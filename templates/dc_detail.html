@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+جزئیات پرونده DC: {{ dc.number }}
+{% endblock %}
+
+{% block page1 %}
+پرونده های DC
+{% endblock %}
+
+{% block page2 %}
+جزئیات پرونده DC: {{ dc.number }}
+{% endblock %}
+
+{% block contain %}
+<div class="row">
+    <div class="my-grid">
+        <div>
+            <label>شماره پرونده</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.number }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>پزشک</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.doctor.full_name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>علت فوت</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.cause_of_death }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>بخش محل فوت</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.location_of_death }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>بخش بستری</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.hospitalization_section.name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ فوت</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.death_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ پذیرش</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.admission_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>سن بیمار</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.age }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>جنسیت بیمار</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.get_gender_display }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>بیمار</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.patient.full_name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ تحویل</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ dc.delivery_date }}" disabled>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

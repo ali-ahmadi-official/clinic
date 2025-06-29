@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+جزئیات پرونده اتاق عمل: {{ room_case.number }}
+{% endblock %}
+
+{% block page1 %}
+پرونده های اتاق عمل
+{% endblock %}
+
+{% block page2 %}
+جزئیات پرونده اتاق عمل: {{ room_case.number }}
+{% endblock %}
+
+{% block contain %}
+<div class="row">
+    <div class="my-grid">
+        <div>
+            <label>تاریخ بستری</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.hospitalization_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ ترخیص</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.discharge_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ عمل</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.operation_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>بیمار</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.patient.full_name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>شماره پرونده</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.number }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>اتاق عمل</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.room.name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>نوع عمل</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.get_operation_type_display }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>کا</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.k }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>جراح</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.doctor.full_name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>نوع بیهوشی</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ room_case.get_anesthesia_type_display }}" disabled>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

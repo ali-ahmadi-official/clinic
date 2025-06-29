@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+فرم ویرایش پزشک
+{% endblock %}
+
+{% block page1 %}
+پزشکان
+{% endblock %}
+
+{% block page2 %}
+فرم ویرایش پزشک
+{% endblock %}
+
+{% block contain %}
+<div class="row">
+    <form method="post">
+        {% csrf_token %}
+        <h3 style="margin-bottom: 20px;">فرم ویرایش پزشک</h3>
+
+        {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <p class="error">{{ error }}</p>
+        {% endfor %}
+        {% endif %}
+
+        <div class="my-grid">
+            <div>
+                <label>{{ form.full_name.label }}</label>
+                <div class="mb-3">
+                    <input type="text" name="full_name" class="form-control" value="{{ form.full_name.value|default:'' }}">
+                </div>
+                {% if form.full_name.errors %}
+                {% for error in form.full_name.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.personnel_code.label }}</label>
+                <div class="mb-3">
+                    <input type="text" name="personnel_code" class="form-control" value="{{ form.personnel_code.value|default:'' }}">
+                </div>
+                {% if form.personnel_code.errors %}
+                {% for error in form.personnel_code.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.grade.label }}</label>
+                {{ form.grade }}
+                {% if form.grade.errors %}
+                {% for error in form.grade.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.sections.label }}</label>
+                {{ form.sections }}
+                {% if form.sections.errors %}
+                {% for error in form.sections.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.rooms.label }}</label>
+                {{ form.rooms }}
+                {% if form.rooms.errors %}
+                {% for error in form.rooms.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.expertises.label }}</label>
+                {{ form.expertises }}
+                {% if form.expertises.errors %}
+                {% for error in form.expertises.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">ثبت جزئیات پزشک</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

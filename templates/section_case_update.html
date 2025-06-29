@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+فرم ویرایش پرونده بخش
+{% endblock %}
+
+{% block page1 %}
+پرونده های بخش
+{% endblock %}
+
+{% block page2 %}
+فرم ویرایش پرونده بخش
+{% endblock %}
+
+{% block contain %}
+<div class="row">
+    <form method="post">
+        {% csrf_token %}
+        <h3 style="margin-bottom: 20px;">فرم ویرایش پرونده بخش</h3>
+
+        {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <p class="error">{{ error }}</p>
+        {% endfor %}
+        {% endif %}
+
+        <div class="my-grid">
+            <div>
+                <label>{{ form.defect_sheet.label }}</label>
+                {{ form.defect_sheet }}
+                {% if form.defect_sheet.errors %}
+                {% for error in form.defect_sheet.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.defect_type.label }}</label>
+                {{ form.defect_type }}
+                {% if form.defect_type.errors %}
+                {% for error in form.defect_type.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.defect_sheet2.label }}</label>
+                {{ form.defect_sheet2 }}
+                {% if form.defect_sheet2.errors %}
+                {% for error in form.defect_sheet2.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.defect_type2.label }}</label>
+                {{ form.defect_type2 }}
+                {% if form.defect_type2.errors %}
+                {% for error in form.defect_type2.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">ثبت جزئیات پرونده بخش</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    jalaliDatepicker.startWatch();
+
+    const inputFile = document.getElementById('profile_image_input');
+    const previewImage = document.getElementById('profile_image_preview');
+    inputFile.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }); 
+</script>
+{% endblock %}

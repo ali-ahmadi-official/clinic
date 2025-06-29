@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+حذف بخش: {{ section.name }}
+{% endblock %}
+
+{% block page1 %}
+بخش ها
+{% endblock %}
+
+{% block page2 %}
+حذف بخش: {{ section.name }}
+{% endblock %}
+
+{% block contain %}
+<div class="row" style="text-align: center; padding-top: 50px;">
+    <h5 style="color: #f97316;">
+        آیا از حذف بخش: {{ section.name }} اطمینان دارید؟
+    </h5>
+    <h6 style="color: red;">
+        پرونده های این بخش نیز حذف خواهد شد
+    </h6>
+
+    <form method="post"> {% csrf_token %}
+        <br>
+        <br>
+        <button class="btn btn-netcopy_net" style="margin-left: 10px; color: red;">تایید و حذف</button>
+        <a href="{% url 'section_list' %}">بیخیال!</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+حذف تمام رکورد ها
+{% endblock %}
+
+{% block page1 %}
+حذف تمام رکورد ها
+{% endblock %}
+
+{% block page2 %}
+حذف تمام رکورد ها
+{% endblock %}
+
+{% block contain %}
+<div class="row" style="text-align: center; padding-top: 50px;">
+    <h5 style="color: #f97316;">
+        آیا از حذف تمام رکورد های درمانگاه خودتان اطمینان دارید؟
+    </h5>
+    <h6 style="color: red;">
+        این کار زمانی کاربرد دارد که احیانا اطلاعات را از فایل اکسل اشتباهی وارد کردید و مایل به حذف همه رکورد ها هستید
+    </h6>
+
+    <form method="post"> {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-netcopy_net" style="margin-left: 10px; color: red;">تایید و حذف</button>
+        <a href="{% url 'main' %}">بیخیال!</a>
+    </form>
+</div>
+{% endblock %}

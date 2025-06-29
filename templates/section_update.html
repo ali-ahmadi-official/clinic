@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+فرم ویرایش بخش
+{% endblock %}
+
+{% block page1 %}
+بخش ها
+{% endblock %}
+
+{% block page2 %}
+فرم ویرایش بخش
+{% endblock %}
+
+{% block contain %}
+<div class="row">
+    <form method="post">
+        {% csrf_token %}
+        <h3 style="margin-bottom: 20px;">فرم ویرایش بخش</h3>
+
+        {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <p class="error">{{ error }}</p>
+        {% endfor %}
+        {% endif %}
+
+        <div class="my-grid">
+            <div>
+                <label>{{ form.name.label }}</label>
+                <div class="mb-3">
+                    <input type="text" name="name" class="form-control" value="{{ form.name.value|default:'' }}">
+                </div>
+                {% if form.name.errors %}
+                {% for error in form.name.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.sheet.label }}</label>
+                <div class="mb-3">
+                    <input type="text" name="sheet" class="form-control" value="{{ form.sheet.value|default:'' }}">
+                </div>
+                {% if form.sheet.errors %}
+                {% for error in form.sheet.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label>{{ form.expertises.label }}</label>
+                {{ form.expertises }}
+                {% if form.expertises.errors %}
+                {% for error in form.expertises.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">ثبت جزئیات بخش</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

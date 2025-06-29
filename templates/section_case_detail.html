@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+جزئیات پرونده بخش: {{ section_case.number }}
+{% endblock %}
+
+{% block page1 %}
+پرونده های بخش
+{% endblock %}
+
+{% block page2 %}
+جزئیات پرونده بخش: {{ section_case.number }}
+{% endblock %}
+
+{% block contain %}
+<div class="row">
+    <div class="my-grid">
+        <div>
+            <label>بیمه</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.insurance }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ ترخیص</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.discharge_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>بخش</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.section.name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>پزشک</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.doctor.full_name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ پذیرش</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.admission_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>شماره پرونده</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.number }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>پزشک معرف</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.representative_doctor }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>بیمار</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.patient.full_name }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ تحویل</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.delivery_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>برگ نقص</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet_display }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>نوع نقص</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_type_display }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>برگ نقص 2</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet2_display }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>نوع نقص 2</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_type2_display }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label style="color: red;">مدت زمان رسیدن پرونده (روز)</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ arrive_day }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label style="color: red;">مدت زمان اقامت بیمار (روز)</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ stay_day }}" disabled>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
