@@ -1825,7 +1825,7 @@ def add_section_case(request):
 
                 for sheet in sheets:
                     section = Section.objects.filter(group=request.user.group, name=sheet).first()
-                    if section not in doctor.sections.all():
+                    if section not in patient.sections.all():
                         patient.sections.add(section)
                         patient.save()
             
