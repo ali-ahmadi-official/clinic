@@ -199,11 +199,6 @@ class RoomCase(models.Model):
         ('3', 'عمل بزرگ'),
     ]
 
-    anesthesia_type_choices = [
-        ('1', 'موضعی'),
-        ('2', 'غیر موضعی'),
-    ]
-
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='room_case_group', verbose_name='گروه')
     hospitalization_date = models.CharField(verbose_name='تاریخ بستری', max_length=10)
     discharge_date = models.CharField(verbose_name='تاریخ ترخیص', max_length=10, null=True, blank=True)
@@ -212,9 +207,9 @@ class RoomCase(models.Model):
     number = models.CharField(verbose_name='شماره پرونده', max_length=50)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room_case', verbose_name='اتاق عمل')
     operation_type = models.CharField(verbose_name='نوع جراحی', max_length=1, choices=operation_type_choices, null=True, blank=True)
-    k = models.IntegerField(verbose_name='کا')
+    k = models.CharField(verbose_name='کا', max_length=10)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='doctor_room_case', verbose_name='جراح')
-    anesthesia_type = models.CharField(verbose_name='نوع بیهوشی', max_length=1, choices=anesthesia_type_choices, null=True, blank=True)
+    anesthesia_type = models.CharField(verbose_name='نوع بیهوشی', max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.number

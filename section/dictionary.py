@@ -36,11 +36,6 @@ operation_type_dict = {
     'عمل بزرگ': '3',
 }
 
-anesthesia_type_dict = {
-    'موضعی': '1',
-    'غیر موضعی': '2',
-}
-
 gender_dict = {
     'مرد': '1',
     'زن': '2',

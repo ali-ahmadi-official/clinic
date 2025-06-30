@@ -15,7 +15,7 @@ from .models import Excel, Expertise, Section, Room, Doctor, Patient, SectionCas
 from .forms import CustomUserCreationForm, LoginForm, ExcelForm, ExpertiseForm, SectionForm, RoomForm, DoctorForm, SectionCaseForm, ConfirmDeleteForm
 from .mixins import ManagerRequiredMixin, UserIsOwnerMixin
 from .jalali import Persian
-from .dictionary import defect_sheet_map, defect_type_map, operation_type_dict, anesthesia_type_dict, gender_dict
+from .dictionary import defect_sheet_map, defect_type_map, operation_type_dict, gender_dict
 
 # در این ویو کامنت گذاری در توابع پیچیده تر انجام شده
 
@@ -467,7 +467,6 @@ def main(request):
                                     room = Room.objects.filter(group=request.user.group, name=room_name).first()
                                     operation_type = operation_type_dict.get(operation_type, None)
                                     doctor = Doctor.objects.filter(group=request.user.group, full_name=doctor_name).first()
-                                    anesthesia_type = anesthesia_type_dict.get(anesthesia_type, None)
 
                                     RoomCase.objects.create(
                                         group=request.user.group,
@@ -2006,7 +2005,6 @@ def add_room_case(request):
                                 room = Room.objects.filter(group=request.user.group, name=room_name).first()
                                 operation_type = operation_type_dict.get(operation_type, None)
                                 doctor = Doctor.objects.filter(group=request.user.group, full_name=doctor_name).first()
-                                anesthesia_type = anesthesia_type_dict.get(anesthesia_type, None)
 
                                 RoomCase.objects.create(
                                     group=request.user.group,
