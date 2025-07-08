@@ -1,3 +1,4 @@
+from multiselectfield import MultiSelectField
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -176,9 +177,25 @@ class SectionCase(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='patient_case', verbose_name='بیمار')
     delivery_date = models.CharField(verbose_name='تاریخ تحویل', max_length=10, null=True, blank=True)
     defect_sheet = models.CharField(verbose_name='برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
-    defect_type = models.CharField(verbose_name='نوع نقص', max_length=2, choices=defect_type_choices, null=True, blank=True)
+    defect_type = MultiSelectField(verbose_name='نوع نقص', choices=defect_type_choices, null=True, blank=True)
     defect_sheet2 = models.CharField(verbose_name='2 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
-    defect_type2 = models.CharField(verbose_name='2 نوع نقص', max_length=2, choices=defect_type_choices, null=True, blank=True)
+    defect_type2 = MultiSelectField(verbose_name='2 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet3 = models.CharField(verbose_name='3 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type3 = MultiSelectField(verbose_name='3 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet4 = models.CharField(verbose_name='4 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type4 = MultiSelectField(verbose_name='4 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet5 = models.CharField(verbose_name='5 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type5 = MultiSelectField(verbose_name='5 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet6 = models.CharField(verbose_name='6 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type6 = MultiSelectField(verbose_name='6 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet7 = models.CharField(verbose_name='7 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type7 = MultiSelectField(verbose_name='7 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet8 = models.CharField(verbose_name='8 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type8 = MultiSelectField(verbose_name='8 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet9 = models.CharField(verbose_name='9 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type9 = MultiSelectField(verbose_name='9 نوع نقص', choices=defect_type_choices, null=True, blank=True)
+    defect_sheet10 = models.CharField(verbose_name='10 برگ نقص', max_length=2, choices=defect_sheet_choices, null=True, blank=True)
+    defect_type10 = MultiSelectField(verbose_name='10 نوع نقص', choices=defect_type_choices, null=True, blank=True)
 
     def __str__(self):
         return self.number

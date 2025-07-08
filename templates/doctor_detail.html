@@ -51,7 +51,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold" style="color: red;">شمار کل بیماران</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار کل بیماران</p>
                             <h5 class="font-weight-bolder mb-0">
                                 {{ patients_count }}
                             </h5>
@@ -85,13 +85,11 @@
                     </div>
                     <div class="col-4 text-start">
                         <div class="icon icon-shape bg-primary shadow text-center border-radius-md"
+                            onclick="exportToExcel1()"
                             style="display: flex; justify-content: center; align-items: center;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                style="color: #fff;" class="bi bi-person-heart" viewBox="0 0 16 16">
-                                <path
-                                    d="M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4m4-2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5M9 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4A.5.5 0 0 1 9 8m1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5" />
-                                <path
-                                    d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM1 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8.96q.04-.245.04-.5C9 10.567 7.21 9 5 9c-2.086 0-3.8 1.398-3.984 3.181A1 1 0 0 1 1 12z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" style="color: #fff;" width="20" height="20" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
                             </svg>
                         </div>
                     </div>
@@ -113,10 +111,11 @@
                     </div>
                     <div class="col-4 text-start">
                         <div class="icon icon-shape bg-primary shadow text-center border-radius-md"
+                            onclick="exportToExcel2()"
                             style="display: flex; justify-content: center; align-items: center;">
-                            <svg style="color: #fff;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sign-dead-end" viewBox="0 0 16 16">
-                                <path d="M4.783 6v2h.69c.593 0 .886-.359.886-1.002S6.07 6 5.473 6zm.333.28h.32c.395 0 .582.24.582.722 0 .48-.186.718-.581.718h-.321zM7.82 7.72h-.918v-.602h.863V6.85h-.863v-.57h.917V6H6.571v2H7.82zm.573-.274L8.216 8h-.34l.688-2h.371l.689 2h-.352l-.177-.554zm.627-.255-.268-.845h-.015l-.27.845zM9.746 6v2h.69c.593 0 .886-.359.886-1.002S11.032 6 10.436 6zm.333.28h.32c.394 0 .582.24.582.722 0 .48-.186.718-.582.718h-.32zm-4.173 4.44h.917V11H5.575V9h1.248v.28h-.917v.57h.863v.268h-.863zm1.489.28V9.56h.013L8.344 11h.292V9h-.32v1.436h-.014L7.369 9h-.293v2zm1.56 0V9h.69c.596 0 .886.355.886.998S10.238 11 9.645 11zm.653-1.72h-.32v1.44h.32c.395 0 .581-.239.581-.718 0-.481-.187-.722-.581-.722"/>
-                                <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098zm-1.4.7a.495.495 0 0 1 .7 0l6.516 6.515a.495.495 0 0 1 0 .7L8.35 14.866a.495.495 0 0 1-.7 0L1.134 8.35a.495.495 0 0 1 0-.7L7.65 1.134Z"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" style="color: #fff;" width="20" height="20" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
                             </svg>
                         </div>
                     </div>
@@ -139,13 +138,11 @@
                     </div>
                     <div class="col-4 text-start">
                         <div class="icon icon-shape bg-primary shadow text-center border-radius-md"
+                            onclick="exportToExcel3()"
                             style="display: flex; justify-content: center; align-items: center;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                style="color: #fff;" class="bi bi-person-heart" viewBox="0 0 16 16">
-                                <path
-                                    d="M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4m4-2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5M9 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4A.5.5 0 0 1 9 8m1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5" />
-                                <path
-                                    d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM1 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8.96q.04-.245.04-.5C9 10.567 7.21 9 5 9c-2.086 0-3.8 1.398-3.984 3.181A1 1 0 0 1 1 12z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" style="color: #fff;" width="20" height="20" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
                             </svg>
                         </div>
                     </div>
@@ -163,6 +160,33 @@
                             <h5 class="font-weight-bolder mb-0" id="defect">
                                 {{ filtered_defect_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent2"></span>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-start">
+                        <div class="icon icon-shape bg-primary shadow text-center border-radius-md"
+                            onclick="exportToExcel4()"
+                            style="display: flex; justify-content: center; align-items: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="color: #fff;" width="20" height="20" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6" style="margin-bottom: 24px !important;">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار تامین اجتماعی</p>
+                            <h5 class="font-weight-bolder mb-0" id="social_security">
+                                {{ filtered_social_security_cases_count }}
+                                <span class="text-success text-sm font-weight-bolder" id="percent3"></span>
                             </h5>
                         </div>
                     </div>
@@ -188,10 +212,68 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار تامین اجتماعی</p>
-                            <h5 class="font-weight-bolder mb-0" id="social_security">
-                                {{ filtered_social_security_cases_count }}
-                                <span class="text-success text-sm font-weight-bolder" id="percent3"></span>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار خدمات درمانی</p>
+                            <h5 class="font-weight-bolder mb-0" id="medical_service">
+                                {{ filtered_medical_services_cases_count }}
+                                <span class="text-success text-sm font-weight-bolder" id="percent4"></span>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-start">
+                        <div class="icon icon-shape bg-primary shadow text-center border-radius-md"
+                            style="display: flex; justify-content: center; align-items: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                style="color: #fff;" class="bi bi-person-heart" viewBox="0 0 16 16">
+                                <path
+                                    d="M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4m4-2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5M9 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4A.5.5 0 0 1 9 8m1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5" />
+                                <path
+                                    d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM1 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8.96q.04-.245.04-.5C9 10.567 7.21 9 5 9c-2.086 0-3.8 1.398-3.984 3.181A1 1 0 0 1 1 12z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6" style="margin-bottom: 24px !important;">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار نیرو های مسلح</p>
+                            <h5 class="font-weight-bolder mb-0" id="armed_force">
+                                {{ filtered_armed_forces_cases_count }}
+                                <span class="text-success text-sm font-weight-bolder" id="percent5"></span>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-start">
+                        <div class="icon icon-shape bg-primary shadow text-center border-radius-md"
+                            style="display: flex; justify-content: center; align-items: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                style="color: #fff;" class="bi bi-person-heart" viewBox="0 0 16 16">
+                                <path
+                                    d="M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4m4-2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5M9 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4A.5.5 0 0 1 9 8m1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5" />
+                                <path
+                                    d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM1 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8.96q.04-.245.04-.5C9 10.567 7.21 9 5 9c-2.086 0-3.8 1.398-3.984 3.181A1 1 0 0 1 1 12z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6" style="margin-bottom: 24px !important;">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار بیمه آزاد</p>
+                            <h5 class="font-weight-bolder mb-0" id="free">
+                                {{ filtered_free_cases_count }}
+                                <span class="text-success text-sm font-weight-bolder" id="percent6"></span>
                             </h5>
                         </div>
                     </div>
@@ -411,11 +493,20 @@
     </div>
 
     <div class="row" style="padding-top: 20px; margin: auto;">
-        <div style="width: 50%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
+        <div style="width: 48%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
             <canvas id="barChart"></canvas>
         </div>
-        <div style="width: 50%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
+        <div style="width: 48%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
             <canvas id="barChartType"></canvas>
+        </div>
+    </div>
+
+    <div class="row" style="padding-top: 20px; margin: auto;">
+        <div style="width: 48%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
+            <canvas id="ageChart"></canvas>
+        </div>
+        <div style="width: 48%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
+            <canvas id="genderChartType"></canvas>
         </div>
     </div>
 
@@ -442,27 +533,431 @@
     {% endfor %}
 </table>
 
+<table style="display: none;">
+    {% for name, count in age_counts.items %}
+    <tr>
+        <td>{{ name }}</td>
+        <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<table style="display: none;">
+    {% for name, count in gender_counts.items %}
+    <tr>
+        <td>{{ name }}</td>
+        <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<div id="myDiv1" class="fixed-div hidden-div" style="display: none; flex-direction: column;">
+<button class="close-btn" onclick="hideAllDivs()">X</button>
+<table id="myTable1" class="table align-items-center mb-0">
+    <tr>
+        <th>
+            بیمه
+        </th>
+        <th>
+            تاریخ ترخیص
+        </th>
+        <th>
+            بخش
+        </th>
+        <th>
+            پزشک
+        </th>
+        <th>
+            تاریخ پذیرش
+        </th>
+        <th>
+            شماره پرونده
+        </th>
+        <th>
+            پزشک معرف
+        </th>
+        <th>
+            بیمار
+        </th>
+        <th>
+            تاریخ تحویل
+        </th>
+    </tr>
+    {% for filtered_section_case in filtered_section_cases %}
+    <tr>
+        <td>
+            {{ filtered_section_case.insurance }}
+        </td>
+        <td>
+            {{ filtered_section_case.discharge_date }}
+        </td>
+        <td>
+            {{ filtered_section_case.section.name }}
+        </td>
+        <td>
+            {{ filtered_section_case.doctor.full_name }}
+        </td>
+        <td>
+            {{ filtered_section_case.admission_date }}
+        </td>
+        <td>
+            {{ filtered_section_case.number }}
+        </td>
+        <td>
+            {{ filtered_section_case.representative_doctor }}
+        </td>
+        <td>
+            {{ filtered_section_case.patient.full_name }}
+        </td>
+        <td>
+            {{ filtered_section_case.delivery_date }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+    {% if filtered_section_cases.has_previous %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&sc_page={{ filtered_section_cases.previous_page_number }}">قبلی</a>
+    {% endif %}
+
+    <span>صفحه {{ filtered_section_cases.number }} از {{ filtered_section_cases.paginator.num_pages }}</span>
+
+    {% if filtered_section_cases.has_next %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&sc_page={{ filtered_section_cases.next_page_number }}">بعدی</a>
+    {% endif %}
+</div>
+
+<div id="myDiv2" class="fixed-div hidden-div" style="display: none; flex-direction: column;">
+<button class="close-btn" onclick="hideAllDivs()">X</button>
+<table id="myTable2" class="table align-items-center mb-0">
+    <tr>
+        <th>
+            شماره پرونده
+        </th>
+        <th>
+            پزشک
+        </th>
+        <th>
+            علت فوت
+        </th>
+        <th>
+            بخش محل فوت
+        </th>
+        <th>
+            بخش بستری
+        </th>
+        <th>
+            تاریخ فوت
+        </th>
+        <th>
+            تاریخ پذیرش
+        </th>
+        <th>
+            سن بیمار
+        </th>
+        <th>
+            جنسیت بیمار
+        </th>
+        <th>
+            بیمار
+        </th>
+        <th>
+            تاریخ تحویل
+        </th>
+    </tr>
+    {% for filtered_dc_section_case in filtered_dc_section_cases %}
+    <tr>
+        <td>
+            {{ filtered_dc_section_case.number }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.doctor.full_name }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.cause_of_death }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.location_of_death }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.hospitalization_section.name }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.death_date }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.admission_date }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.age }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.get_gender_display }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.patient.full_name }}
+        </td>
+        <td>
+            {{ filtered_dc_section_case.delivery_date }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+    {% if filtered_dc_section_cases.has_previous %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&dc_page={{ filtered_dc_section_cases.previous_page_number }}">قبلی</a>
+    {% endif %}
+
+    <span>صفحه {{ filtered_dc_section_cases.number }} از {{ filtered_dc_section_cases.paginator.num_pages }}</span>
+
+    {% if filtered_dc_section_cases.has_next %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&dc_page={{ filtered_dc_section_cases.next_page_number }}">بعدی</a>
+    {% endif %}
+</div>
+
+<div id="myDiv3" class="fixed-div hidden-div" style="display: none; flex-direction: column;">
+<button class="close-btn" onclick="hideAllDivs()">X</button>
+<table id="myTable3" class="table align-items-center mb-0">
+    <tr>
+        <th>
+            بیمه
+        </th>
+        <th>
+            تاریخ ترخیص
+        </th>
+        <th>
+            بخش
+        </th>
+        <th>
+            پزشک
+        </th>
+        <th>
+            تاریخ پذیرش
+        </th>
+        <th>
+            شماره پرونده
+        </th>
+        <th>
+            پزشک معرف
+        </th>
+        <th>
+            بیمار
+        </th>
+        <th>
+            تاریخ تحویل
+        </th>
+    </tr>
+    {% for filtered_section_case in filtered_not_arrived_cases %}
+    <tr>
+        <td>
+            {{ filtered_section_case.insurance }}
+        </td>
+        <td>
+            {{ filtered_section_case.discharge_date }}
+        </td>
+        <td>
+            {{ filtered_section_case.section.name }}
+        </td>
+        <td>
+            {{ filtered_section_case.doctor.full_name }}
+        </td>
+        <td>
+            {{ filtered_section_case.admission_date }}
+        </td>
+        <td>
+            {{ filtered_section_case.number }}
+        </td>
+        <td>
+            {{ filtered_section_case.representative_doctor }}
+        </td>
+        <td>
+            {{ filtered_section_case.patient.full_name }}
+        </td>
+        <td>
+            {{ filtered_section_case.delivery_date }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+    {% if filtered_not_arrived_cases.has_previous %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&nc_page={{ filtered_not_arrived_cases.previous_page_number }}">قبلی</a>
+    {% endif %}
+
+    <span>صفحه {{ filtered_not_arrived_cases.number }} از {{ filtered_not_arrived_cases.paginator.num_pages }}</span>
+
+    {% if filtered_not_arrived_cases.has_next %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&nc_page={{ filtered_not_arrived_cases.next_page_number }}">بعدی</a>
+    {% endif %}
+</div>
+
+<div id="myDiv4" class="fixed-div hidden-div" style="display: none; flex-direction: column;">
+<button class="close-btn" onclick="hideAllDivs()">X</button>
+<table id="myTable4" class="table align-items-center mb-0">
+    <tr>
+        <th>
+            بیمه
+        </th>
+        <th>
+            تاریخ ترخیص
+        </th>
+        <th>
+            بخش
+        </th>
+        <th>
+            پزشک
+        </th>
+        <th>
+            تاریخ پذیرش
+        </th>
+        <th>
+            شماره پرونده
+        </th>
+        <th>
+            پزشک معرف
+        </th>
+        <th>
+            بیمار
+        </th>
+        <th>
+            تاریخ تحویل
+        </th>
+    </tr>
+    {% for filtered_section_case in filtered_defect_cases %}
+    <tr>
+        <td>
+            {{ filtered_section_case.insurance }}
+        </td>
+        <td>
+            {{ filtered_section_case.discharge_date }}
+        </td>
+        <td>
+            {{ filtered_section_case.section.name }}
+        </td>
+        <td>
+            {{ filtered_section_case.doctor.full_name }}
+        </td>
+        <td>
+            {{ filtered_section_case.admission_date }}
+        </td>
+        <td>
+            {{ filtered_section_case.number }}
+        </td>
+        <td>
+            {{ filtered_section_case.representative_doctor }}
+        </td>
+        <td>
+            {{ filtered_section_case.patient.full_name }}
+        </td>
+        <td>
+            {{ filtered_section_case.delivery_date }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+    {% if filtered_defect_cases.has_previous %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&defc_page={{ filtered_defect_cases.previous_page_number }}">قبلی</a>
+    {% endif %}
+
+    <span>صفحه {{ filtered_defect_cases.number }} از {{ filtered_defect_cases.paginator.num_pages }}</span>
+
+    {% if filtered_defect_cases.has_next %}
+        <a href="?start={{ request.GET.start }}&end={{ request.GET.end }}&defc_page={{ filtered_defect_cases.next_page_number }}">بعدی</a>
+    {% endif %}
+</div>
+
+<script>
+    function exportToExcel1() {
+        const div = document.querySelector('#myDiv1');
+        const black = document.querySelector('.black');
+        div.style.display = 'flex';
+        black.style.display = 'flex';
+
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.table_to_sheet(document.getElementById('myTable1'));
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "table.xlsx");
+    }
+
+    function exportToExcel2() {
+        const div = document.querySelector('#myDiv2');
+        const black = document.querySelector('.black');
+        div.style.display = 'flex';
+        black.style.display = 'flex';
+
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.table_to_sheet(document.getElementById('myTable2'));
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "table.xlsx");
+    }
+
+    function exportToExcel3() {
+        const black = document.querySelector('.black');
+        const div = document.querySelector('#myDiv3');
+        div.style.display = 'flex';
+        black.style.display = 'flex';
+
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.table_to_sheet(document.getElementById('myTable3'));
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "table.xlsx");
+    }
+
+    function exportToExcel4() {
+        const black = document.querySelector('.black');
+        const div = document.querySelector('#myDiv4');
+        div.style.display = 'flex';
+        black.style.display = 'flex';
+
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.table_to_sheet(document.getElementById('myTable4'));
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "table.xlsx");
+    }
+
+    function hideAllDivs() {
+        const divs = document.querySelectorAll('.hidden-div');
+        const black = document.querySelector('.black');
+        divs.forEach(div => div.style.display = 'none');
+        black.style.display = 'none';
+        black.style.display = 'none';
+    }
+</script>
+
 <script>
     function calculator() {
         const total = parseInt(document.getElementById("total").innerText);
         const defect = parseInt(document.getElementById("defect").innerText);
         const not_case = parseInt(document.getElementById("not_case").innerText);
         const social_security = parseInt(document.getElementById("social_security").innerText);
+        const medical_service = parseInt(document.getElementById("medical_service").innerText);
+        const armed_force = parseInt(document.getElementById("armed_force").innerText);
+        const free = parseInt(document.getElementById("free").innerText);
         const percent1 = document.getElementById("percent1");
         const percent2 = document.getElementById("percent2");
         const percent3 = document.getElementById("percent3");
+        const percent4 = document.getElementById("percent4");
+        const percent5 = document.getElementById("percent5");
+        const percent6 = document.getElementById("percent6");
 
         if (total > 0) {
             let p1 = Math.floor((not_case * 100) / total);
             let p2 = Math.floor((defect * 100) / total);
             let p3 = Math.floor((social_security * 100) / total);
+            let p4 = Math.floor((medical_service * 100) / total);
+            let p5 = Math.floor((armed_force * 100) / total);
+            let p6 = Math.floor((free * 100) / total);
             percent1.innerText = p1 + "%";
             percent2.innerText = p2 + "%";
             percent3.innerText = p3 + "%";
+            percent4.innerText = p4 + "%";
+            percent5.innerText = p5 + "%";
+            percent6.innerText = p6 + "%";
         } else {
             percent1.innerText = "0%";
             percent2.innerText = "0%";
             percent3.innerText = "0%";
+            percent4.innerText = "0%";
+            percent5.innerText = "0%";
+            percent6.innerText = "0%";
         }
     }
 

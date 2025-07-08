@@ -16,17 +16,22 @@
     <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
     <script src="{% static 'js/chart.min.js' %}"></script>
     <script src="{% static 'js/html2canvas.min.js' %}"></script>
+    <script src="{% static 'js/xlsx.full.min.js' %}"></script>
 </head>
 
-<body class="g-sidenav-show rtl bg-gray-100">
+<body class="g-sidenav-show rtl bg-gray-100"
+style="background-image: url('{% static 'img/backg.jpg' %}'); background-repeat: no-repeat; background-attachment: fixed; background-size: cover; background-position: center;">
+    <div class="black" style="display: none; background-color: black; opacity: 0.4; width: 100vw; height: 100vh; position: fixed; z-index: 9998;">
+
+    </div>
     <aside
         class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-end me-3 rotate-caret"
         id="sidenav-main" style="background: #FFFFFF;
-background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65, 1) 100%);">
+background: linear-gradient(157deg, rgb(213, 213, 213) 0%, #333446 100%); margin-top: 56px !important;">
         <div class="sidenav-header">
             <div class="navbar-brand m-0" target="_blank">
                 <img src="{% static 'img/logo_t.png' %}" class="navbar-brand-img h-100" alt="main_logo">
-                <span class="me-1 font-weight-bold">درمانگاه</span>
+                <span class="me-1 font-weight-bold" style="color: #fff;">سازمان تامین اجتماعی</span>
             </div>
         </div>
         <hr class="horizontal dark mt-0">
@@ -56,7 +61,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">نمای کلی</span>
+                        <span class="nav-link-text me-1" id="color">نمای کلی</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -83,7 +88,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">بخش ها</span>
+                        <span class="nav-link-text me-1" id="color">گزارش گردش پرونده بستری</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -110,7 +115,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">اتاق های عمل</span>
+                        <span class="nav-link-text me-1" id="color">گزارش بیماران اتاق عمل ها</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -137,7 +142,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">تخصص ها</span>
+                        <span class="nav-link-text me-1" id="color">تعریف تخصص ها</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -167,7 +172,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">پزشکان</span>
+                        <span class="nav-link-text me-1" id="color">پزشکان</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -197,7 +202,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">بیماران</span>
+                        <span class="nav-link-text me-1" id="color">بیماران</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -224,7 +229,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">پرونده های بخش</span>
+                        <span class="nav-link-text me-1" id="color">پرونده های بستری</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -251,7 +256,7 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">پرونده های اتاق عمل</span>
+                        <span class="nav-link-text me-1" id="color">پرونده های اتاق عمل</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -278,13 +283,116 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1">پرونده های DC</span>
+                        <span class="nav-link-text me-1" id="color">پرونده های فوتی</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if '/analyze/section/' in request.path %} active {% endif %}" href="{% url 'analyze_section' %}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center ms-2 d-flex align-items-center justify-content-center">
+                            <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <title></title>
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF"
+                                        fill-rule="nonzero">
+                                        <g transform="translate(1716.000000, 291.000000)">
+                                            <g transform="translate(453.000000, 454.000000)">
+                                                <path class="color-background opacity-6"
+                                                    d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z">
+                                                </path>
+                                                <path class="color-background"
+                                                    d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <span class="nav-link-text me-1" id="color">مقایسه بخش ها</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if '/analyze/room/' in request.path %} active {% endif %}" href="{% url 'analyze_room' %}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center ms-2 d-flex align-items-center justify-content-center">
+                            <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <title></title>
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF"
+                                        fill-rule="nonzero">
+                                        <g transform="translate(1716.000000, 291.000000)">
+                                            <g transform="translate(453.000000, 454.000000)">
+                                                <path class="color-background opacity-6"
+                                                    d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z">
+                                                </path>
+                                                <path class="color-background"
+                                                    d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <span class="nav-link-text me-1" id="color">مقایسه اتاق عمل ها</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if '/analyze/doctor/' in request.path %} active {% endif %}" href="{% url 'analyze_doctor' %}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center ms-2 d-flex align-items-center justify-content-center">
+                            <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <title></title>
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF"
+                                        fill-rule="nonzero">
+                                        <g transform="translate(1716.000000, 291.000000)">
+                                            <g transform="translate(453.000000, 454.000000)">
+                                                <path class="color-background opacity-6"
+                                                    d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z">
+                                                </path>
+                                                <path class="color-background"
+                                                    d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <span class="nav-link-text me-1" id="color">مقایسه پزشکان</span>
                     </a>
                 </li>
             </ul>
         </div>
     </aside>
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg overflow-x-hidden">
+    <div class="my-nav">
+        <div class="sazman">
+            <img src="{% static 'img/sa.jpg' %}" style="height: 35px; border-radius: 5px;" alt="">
+            <p style="margin: 0; color: #fff; margin-right: 8px;">سازمان تامین اجتماعی</p>
+        </div>
+        <div class="daneshgah">
+            <img src="{% static 'img/da.jpg' %}" style="height: 35px; border-radius: 5px;" alt="">
+            <p style="margin: 0; color: #fff; margin-right: 8px;">دانشگاه شهید بهشتی</p>
+        </div>
+        <div class="log" style="height: 40px;">
+            <p style="margin: 0; color: #fff; margin-left: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+  <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+</svg>
+                {{ request.user.get_full_name }} /</p>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="nav-link text-body font-weight-bold px-0" style="color: #fff !important;">خروج</button>
+            </form>
+        </div>
+    </div>
+    <main class="main-content position-relative h-100 border-radius-lg overflow-x-hidden"
+    style="max-height: calc(100vh - 40px);">
         <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
             navbar-scroll="true">
             <div class="container-fluid py-1 px-3">
@@ -296,28 +404,9 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                     </ol>
                     <h6 class="font-weight-bolder mb-0">{% block page2 %} {% endblock %}</h6>
                 </nav>
-                <div class="collapse navbar-collapse mt-sm-0 mt-2 px-0" id="navbar">
-                    <ul class="navbar-nav me-auto ms-0 justify-content-end">
-                        <li class="nav-item d-flex align-items-center">
-                            <form action="{% url 'logout' %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="nav-link text-body font-weight-bold px-0">خروج</button>
-                            </form>
-                        </li>
-                        <li class="nav-item d-xl-none pe-3 d-flex align-items-center">
-                            <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                                <div class="sidenav-toggler-inner">
-                                    <i class="sidenav-toggler-line"></i>
-                                    <i class="sidenav-toggler-line"></i>
-                                    <i class="sidenav-toggler-line"></i>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
             </div>
         </nav>
-        <div class="container-fluid py-4">
+        <div class="container-fluid py-4" style="min-height: 100vh;">
             {% block contain %}
             {% endblock %}
         </div>
@@ -821,6 +910,197 @@ background: linear-gradient(157deg, rgba(255, 255, 255, 1) 0%, rgba(250, 142, 65
                 }
             }
         });
+    </script>
+    <script>
+        var defect_percents = {{ defect_percents| safe }};
+        var ctx = document.getElementById('barChartPercent').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'برگ پذیرش خلاصه ترخیص',
+                    'برگ خلاصه پرونده',
+                    'برگ شرح حال',
+                    'برگ سیربیماری',
+                    'برگ مشاوره',
+                    'برگ مراقبت قبل از عمل',
+                    'برگ بیهوشی',
+                    'برگ شرح عمل',
+                    'برگ مراقبت بعد از عمل',
+                    'دستورات پزشک',
+                    'گزارش پرستار',
+                    'نمودار علائم حیاتی',
+                    'رضایت آگاهانه',
+                    'صورتحساب',
+                    'چک لیست'
+                ],
+                datasets: [{
+                    label: 'پراکندگی درصد اوراق نقص پرونده',
+                    data: Object.values(defect_percents),
+                    backgroundColor: [
+                        '#f97316', // اصلی
+                        '#fb923c', // روشن‌تر
+                        '#fdba74', // خیلی روشن‌تر
+                        '#ea580c', // کمی تیره‌تر
+                        '#c2410c', // تیره‌تر
+                        '#9a3412', // تیره و گرم‌تر
+                        '#f59e0b', // نارنجی زردتر
+                        '#facc15', // زرد گرم
+                        '#fcd34d', // زرد روشن‌تر
+                        '#fde68a', // زرد خیلی روشن
+                        '#f08c00', // نارنجی استاندارد
+                        '#ff7f50', // مرجانی نارنجی
+                        '#ff8c00', // نارنجی تیره استاندارد
+                        '#e25822', // نارنجی زنگ زده
+                        '#d97706'  // بین نارنجی و قهوه‌ای
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        var defect_type_percents = {{ defect_type_percents| safe }};
+        var ctx = document.getElementById('barChartTypePercent').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'عدم درج مهر پزشک',
+                    'مهر مشاوره',
+                    'مهر tellorder',
+                    'فقدان برگ',
+                    'عدم تکمیل گزارش',
+                    'خط خوردگی',
+                    'عدم تکمیل سربرگ',
+                    'عدم تشخیص نویسی',
+                    'عدم اخذ رضایت',
+                    'عدم اثر انگشت و امضا',
+                    'عدم ثبت دقیق آدرس و تلفن بیمار',
+                ],
+                datasets: [{
+                    label: 'پراکندگی درصد نوع نقص پرونده',
+                    data: Object.values(defect_type_percents),
+                    backgroundColor: [
+                        '#f97316', // اصلی
+                        '#fb923c', // روشن‌تر
+                        '#fdba74', // خیلی روشن‌تر
+                        '#ea580c', // کمی تیره‌تر
+                        '#c2410c', // تیره‌تر
+                        '#9a3412', // تیره و گرم‌تر
+                        '#f59e0b', // نارنجی زردتر
+                        '#facc15', // زرد گرم
+                        '#fcd34d', // زرد روشن‌تر
+                        '#fde68a', // زرد خیلی روشن
+                        '#f08c00', // نارنجی استاندارد
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        var age_counts = {{ age_counts| safe }};
+        var ctx = document.getElementById('ageChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'کمتر از 20 سال',
+                    'بین 20 تا 40',
+                    'بین 40 تا 60',
+                    'بین 60 تا 80',
+                    'بیشتر از 80 سال',
+                ],
+                datasets: [{
+                    label: 'پراکندگی سن فوت شدگان',
+                    data: Object.values(age_counts),
+                    backgroundColor: [
+                        '#f97316', // اصلی
+                        '#fb923c', // روشن‌تر
+                        '#fdba74', // خیلی روشن‌تر
+                        '#ea580c', // کمی تیره‌تر
+                        '#c2410c', // تیره‌تر
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        var gender_counts = {{ gender_counts| safe }};
+        var ctx = document.getElementById('genderChartType').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'مرد',
+                    'زن',
+                ],
+                datasets: [{
+                    label: 'پراکندگی جنسیت فوت شدگان',
+                    data: Object.values(gender_counts),
+                    backgroundColor: [
+                        '#fb923c',
+                        '#c2410c',
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        const divs = document.querySelectorAll("#color");
+
+divs.forEach(div => {
+  const parent = div.parentElement;
+  const parentBg = window.getComputedStyle(parent).backgroundColor;
+
+  function isWhite(rgb) {
+    return rgb === "rgb(255, 255, 255)";
+  }
+
+  function isBlack(rgb) {
+    return rgb === "rgb(0, 0, 0)";
+  }
+
+  if (isWhite(parentBg)) {
+    div.style.color = "black";
+  } else if (isBlack(parentBg)) {
+    div.style.color = "white";
+  } else {
+    div.style.color = "#fff";
+  }
+});
+
     </script>
 </body>
 

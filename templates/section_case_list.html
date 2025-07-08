@@ -18,6 +18,10 @@
     <div class="col-12">
         <h5>فیلتر پرونده های بخش <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
         <form method="get" class="my-form" style="grid-template-columns: repeat(4, 1fr);">
+            <input data-jdp title="از تاریخ" name="start" class="form-control w-40" placeholder="از تاریخ" style="width: 100% !important;"
+                value="{{ request.GET.start }}" autocomplete="off">
+            <input data-jdp title="تا تاریخ" name="end" class="form-control w-40" placeholder="تا تاریخ" style="width: 100% !important;"
+                value="{{ request.GET.end }}" autocomplete="off">
             <input title="شماره پرونده" type="text" name="number" class="form-control w-40" placeholder="شماره پرونده" style="width: 100% !important;"
                 value="{{ request.GET.number }}">
             <input data-jdp title="تاریخ پذیرش" type="text" name="admission_date" class="form-control w-40" placeholder="تاریخ پذیرش" style="width: 100% !important;"
@@ -154,13 +158,13 @@
     <div class="col-12">
         <div class="page">
             {% if page_obj.has_previous %}
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.previous_page_number }}">
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.previous_page_number }}">
                 <div class="ago">
                     <p>قبلی</p>
                 </div>
             </a>
             {% if page_obj.number > 3 %}
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page=1" class="number">1</a>
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page=1" class="number">1</a>
                 {% if page_obj.number > 4 %}
                 <span class="number">...</span>
                 {% endif %}
@@ -169,21 +173,21 @@
             
             {% for num in page_obj.paginator.page_range %}
             {% if page_obj.number == num %}
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ num }}" class="number">{{ num }}</a>
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ num }}" class="number">{{ num }}</a>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} 
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ num }}" class="number">{{ num }}</a>
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ num }}" class="number">{{ num }}</a>
             {% endif %}
             {% endfor %}
             
             {% if page_obj.has_next %}
             {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
             <span class="number">...</span>
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.paginator.num_pages }}" class="number">{{ page_obj.paginator.num_pages }}</a>
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.paginator.num_pages }}" class="number">{{ page_obj.paginator.num_pages }}</a>
             {% elif page_obj.number < page_obj.paginator.num_pages|add:'-2' %} 
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.paginator.num_pages }}" class="number">{{ page_obj.paginator.num_pages }}</a>
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.paginator.num_pages }}" class="number">{{ page_obj.paginator.num_pages }}</a>
             {% endif %}
             
-            <a href="{% url 'section_case_list' %}?number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.next_page_number }}">
+            <a href="{% url 'section_case_list' %}?start={{ request.GET.start }}&end={{ request.GET.end }}&number={{ request.GET.number }}&admission_date={{ request.GET.admission_date }}&doctor={{ request.GET.doctor }}&section={{ request.GET.section }}&page={{ page_obj.next_page_number }}">
                 <div class="next">
                     <p>بعدی</p>
                 </div>

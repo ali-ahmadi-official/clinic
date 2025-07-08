@@ -58,13 +58,64 @@ class DoctorForm(forms.ModelForm):
 class SectionCaseForm(forms.ModelForm):
     class Meta:
         model = SectionCase
-        fields = ['defect_sheet', 'defect_type', 'defect_sheet2', 'defect_type2']
+        fields = [
+            'defect_sheet', 'defect_type', 'defect_sheet2', 'defect_type2', 'defect_sheet3', 'defect_type3',
+            'defect_sheet4', 'defect_type4', 'defect_sheet5', 'defect_type5', 'defect_sheet6', 'defect_type6',
+            'defect_sheet7', 'defect_type7', 'defect_sheet8', 'defect_type8', 'defect_sheet9', 'defect_type9',
+            'defect_sheet10', 'defect_type10',
+        ]
         widgets = {
             'defect_sheet': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type': forms.SelectMultiple(attrs={'class': 'form-control'}),
             'defect_sheet2': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type2': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type2': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet3': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type3': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet4': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type4': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet5': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type5': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet6': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type6': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet7': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type7': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet8': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type8': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet9': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type9': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_sheet10': forms.Select(attrs={'class': 'form-control'}),
+            'defect_type10': forms.SelectMultiple(attrs={'class': 'form-control'}),
         }
 
 class ConfirmDeleteForm(forms.Form):
     confirm = forms.BooleanField(label="تایید نهایی")
+
+class MultiSectionForm(forms.Form):
+    sections = forms.ModelMultipleChoiceField(
+        queryset=Section.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        required=True,
+        label="بخش‌ها"
+    )
+    start = forms.CharField(label="تاریخ شروع", required=False)
+    end = forms.CharField(label="تاریخ پایان", required=False)
+
+class MultiRoomForm(forms.Form):
+    rooms = forms.ModelMultipleChoiceField(
+        queryset=Room.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        required=True,
+        label="اتاق عمل ها"
+    )
+    start = forms.CharField(label="تاریخ شروع", required=False)
+    end = forms.CharField(label="تاریخ پایان", required=False)
+
+class MultiDoctorForm(forms.Form):
+    doctors = forms.ModelMultipleChoiceField(
+        queryset=Doctor.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        required=True,
+        label="پزشکان"
+    )
+    start = forms.CharField(label="تاریخ شروع", required=False)
+    end = forms.CharField(label="تاریخ پایان", required=False)

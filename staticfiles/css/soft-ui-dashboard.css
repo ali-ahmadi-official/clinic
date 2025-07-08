@@ -28054,3 +28054,59 @@ pre[class*=language-] {
 .page p {
     margin-bottom: 0;
 }
+
+.my-nav {
+  height: 40px;
+  width: 100vw;
+  background: linear-gradient(157deg, rgb(213, 213, 213) 0%, #333446 100%);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.sazman,
+.daneshgah,
+.log {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+}
+
+.fixed-div {
+  max-width: 900px !important;
+  max-height: 300px !important;
+  overflow: scroll !important;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background-color: #FFFCFB;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.hla-grid {
+  border: none;
+  outline: none;
+  text-align: center;
+}
+
+.close-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  padding: 10px;
+  right: 0;
+  top: 0;
+  border-radius: 25px;
+  outline: none;
+  border: none;
+  background-color: #FF3F33;
+  font-size: smaller;
+}

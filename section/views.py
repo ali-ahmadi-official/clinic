@@ -1,18 +1,22 @@
 import pandas as pd
 from functools import wraps
-from collections import Counter
+from collections import Counter, defaultdict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from .models import Excel, Expertise, Section, Room, Doctor, Patient, SectionCase, RoomCase, DC
-from .forms import CustomUserCreationForm, LoginForm, ExcelForm, ExpertiseForm, SectionForm, RoomForm, DoctorForm, SectionCaseForm, ConfirmDeleteForm
+from .forms import (
+    CustomUserCreationForm, LoginForm, 
+    ExcelForm, ExpertiseForm, SectionForm, RoomForm, DoctorForm, SectionCaseForm, ConfirmDeleteForm,
+    MultiSectionForm, MultiRoomForm, MultiDoctorForm
+)
 from .mixins import ManagerRequiredMixin, UserIsOwnerMixin
 from .jalali import Persian
 from .dictionary import defect_sheet_map, defect_type_map, operation_type_dict, gender_dict
@@ -102,69 +106,192 @@ def custom_login_view(request):
 @login_required
 @manager_required
 def main(request):
-    if Excel.objects.filter(group=request.user.group):
-        doctors_count = Doctor.objects.filter(group=request.user.group).count()
-        patients_count = Patient.objects.filter(group=request.user.group).count()
-        sections_count = Section.objects.filter(group=request.user.group).count()
-        rooms_count = Room.objects.filter(group=request.user.group).count()
-        section_cases_count = SectionCase.objects.filter(group=request.user.group).count()
-        room_cases = RoomCase.objects.filter(group=request.user.group)
-        bigroom_cases = RoomCase.objects.filter(group=request.user.group, operation_type='3')
-        mediumroom_cases = RoomCase.objects.filter(group=request.user.group, operation_type='2')
-        smallroom_cases = RoomCase.objects.filter(group=request.user.group, operation_type='1')
+    group = request.user.group
+
+    if Excel.objects.filter(group=group).exists():
+        # آمار اولیه
+        doctors_count = Doctor.objects.filter(group=group).count()
+        patients_count = Patient.objects.filter(group=group).count()
+        sections = Section.objects.filter(group=group)
+        rooms = Room.objects.filter(group=group)
+        sections_count = sections.count()
+        rooms_count = rooms.count()
+
+        section_cases = SectionCase.objects.filter(group=group)
+        section_cases_count = section_cases.count()
+        room_cases = RoomCase.objects.filter(group=group)
         room_cases_count = room_cases.count()
         cases_count = section_cases_count + room_cases_count
-        defect_section_cases_count = SectionCase.objects.filter(
-            Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
-        ).filter(group=request.user.group).count()
 
-        sections = Section.objects.filter(group=request.user.group).order_by('-id')[:3]
-        rooms = Room.objects.filter(group=request.user.group).order_by('-id')[:3]
+        defect_cases = section_cases.filter(
+            Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False) |
+            Q(defect_sheet3__isnull=False) | Q(defect_sheet4__isnull=False) |
+            Q(defect_sheet5__isnull=False) | Q(defect_sheet6__isnull=False) |
+            Q(defect_sheet7__isnull=False) | Q(defect_sheet8__isnull=False) |
+            Q(defect_sheet9__isnull=False) | Q(defect_sheet10__isnull=False)
+        )
+        defect_section_cases_count = defect_cases.count()
 
-        defect_counts = {}
-        defect_type_counts = {}
+        # آمار بیمه‌ها
+        def count_insurance(keyword):
+            return section_cases.filter(insurance__icontains=keyword).count()
+
+        social_security_cases = count_insurance("تامین اجتماعی")
+        medical_services_cases = count_insurance("خدمات درمانی")
+        armed_forces_cases = count_insurance("نیرو های مسلح")
+        free_cases = count_insurance("آزاد")
+
+        # آخرین اتاق‌ها و بخش‌ها
+        sections_recent = sections.order_by('-id')[:3]
+        rooms_recent = rooms.order_by('-id')[:3]
+
+        # تحلیل پزشکان اتاق عمل
         doctor_room_list = []
         doctor_bigroom_list = []
         doctor_mediumroom_list = []
         doctor_smallroom_list = []
 
-        # تعیین لیست پزشکان پرونده های اتاق عمل
-        for room_case in room_cases:
-            doctor_name = room_case.doctor.full_name
-            doctor_room_list.append(doctor_name)
-        
-        # تعیین لیست پزشکان پرونده های اتاق عمل بزرگ
-        for bigroom_case in bigroom_cases:
-            doctor_name = bigroom_case.doctor.full_name
-            doctor_bigroom_list.append(doctor_name)
-        
-        # تعیین لیست پزشکان پرونده های اتاق عمل متوسط
-        for mediumroom_case in mediumroom_cases:
-            doctor_name = mediumroom_case.doctor.full_name
-            doctor_mediumroom_list.append(doctor_name)
-        
-        # تعیین لیست پزشکان پرونده های اتاق عمل کوچک
-        for smallroom_case in smallroom_cases:
-            doctor_name = smallroom_case.doctor.full_name
-            doctor_smallroom_list.append(doctor_name)
-        
-        # تعیین پزشک با بیشترین عمل در انواع سایز
-        most_doctor_room_list = Counter(doctor_room_list).most_common(1)
-        most_doctor_bigroom_list = Counter(doctor_bigroom_list).most_common(1)
-        most_doctor_mediumroom_list = Counter(doctor_mediumroom_list).most_common(1)
-        most_doctor_smallroom_list = Counter(doctor_smallroom_list).most_common(1)
+        for case in room_cases.select_related('doctor'):
+            full_name = case.doctor.full_name
+            doctor_room_list.append(full_name)
+            if case.operation_type == '1':
+                doctor_smallroom_list.append(full_name)
+            elif case.operation_type == '2':
+                doctor_mediumroom_list.append(full_name)
+            elif case.operation_type == '3':
+                doctor_bigroom_list.append(full_name)
 
-        # پراکندگی اوراق نقص در بین پرونده های نقص خورده
-        for code, name in defect_sheet_choices:
-            count_sheet1 = SectionCase.objects.filter(group=request.user.group, defect_sheet=code).count()
-            count_sheet2 = SectionCase.objects.filter(group=request.user.group, defect_sheet2=code).count()
-            defect_counts[name] = count_sheet1 + count_sheet2
-        
-        # پراکندگی انواع نقص در بین پرونده های نقص خورده
-        for code, name in defect_type_choices:
-            count_sheet1 = SectionCase.objects.filter(group=request.user.group, defect_type=code).count()
-            count_sheet2 = SectionCase.objects.filter(group=request.user.group, defect_type2=code).count()
-            defect_type_counts[name] = count_sheet1 + count_sheet2
+        def most_common_or_none(lst):
+            return Counter(lst).most_common(1)
+
+        # آماده‌سازی داده نقص
+        defect_counts = {}
+        defect_percents = {}
+        defect_type_counts = {}
+        defect_type_percents = {}
+
+        filtered_section_cases = []
+
+        if request.GET.get("start") and request.GET.get("end"):
+            try:
+                start = Persian(request.GET["start"]).gregorian_datetime()
+                end = Persian(request.GET["end"]).gregorian_datetime()
+                if start > end:
+                    start, end = end, start
+
+                for case in section_cases:
+                    if isinstance(case.admission_date, str):
+                        try:
+                            case_date = Persian(case.admission_date).gregorian_datetime()
+                            if start <= case_date <= end:
+                                filtered_section_cases.append(case)
+                        except:
+                            continue
+
+                # شمارش نقص‌ها در بازه زمانی
+                def count_defects(
+                        cases, 
+                        field1, field2, field3, field4, field5, field6, field7, field8, field9, field10,
+                        choices
+                ):
+                    counts, percents = {}, {}
+                    for code, name in choices:
+                        count = sum(1 for c in cases if getattr(c, field1) == code or getattr(c, field2) == code or getattr(c, field3) == code or getattr(c, field4) == code or getattr(c, field5) == code or getattr(c, field6) == code or getattr(c, field7) == code or getattr(c, field8) == code or getattr(c, field9) == code or getattr(c, field10) == code)
+                        total = sum(1 for c in cases if getattr(c, field1) or getattr(c, field2))
+                        counts[name] = count
+                        percents[name] = round((count * 100 / total), 0) if total else 0
+                    return counts, percents
+                
+                def count_multiselect_defects(cases, fields, choices):
+                    counts, percents = {}, {}
+                    total = sum(
+                        1 for c in cases if any(getattr(c, f, None) for f in fields)
+                    )
+
+                    for code, name in choices:
+                        count = sum(
+                            1 for c in cases for f in fields
+                            if code in (getattr(c, f, []) or [])
+                        )
+                        counts[name] = count
+                        percents[name] = round((count * 100 / total), 0) if total else 0
+
+                    return counts, percents
+
+                defect_counts, defect_percents = count_defects(
+                    filtered_section_cases, 
+                    'defect_sheet', 'defect_sheet2', 'defect_sheet3', 'defect_sheet4', 'defect_sheet5', 'defect_sheet6', 'defect_sheet7', 'defect_sheet8', 'defect_sheet9', 'defect_sheet10', 
+                    defect_sheet_choices
+                )
+
+                fields = [
+                    'defect_type', 'defect_type2', 'defect_type3',
+                    'defect_type4', 'defect_type5', 'defect_type6',
+                    'defect_type7', 'defect_type8', 'defect_type9', 'defect_type10'
+                ]
+
+                defect_type_counts, defect_type_percents = count_multiselect_defects(
+                    filtered_section_cases,
+                    fields,
+                    defect_type_choices
+                )
+
+            except:
+                pass
+        else:
+            def count_global_defects(
+                    field1, field2, field3, field4, field5, field6, field7, field8, field9, field10,
+                    choices, filter_field
+            ):
+                counts, percents = {}, {}
+                total = defect_cases.count()
+                for code, name in choices:
+                    count = section_cases.filter(**{field1: code}).count() + \
+                            section_cases.filter(**{field2: code}).count() + \
+                            section_cases.filter(**{field3: code}).count() + \
+                            section_cases.filter(**{field4: code}).count() + \
+                            section_cases.filter(**{field5: code}).count() + \
+                            section_cases.filter(**{field6: code}).count() + \
+                            section_cases.filter(**{field7: code}).count() + \
+                            section_cases.filter(**{field8: code}).count() + \
+                            section_cases.filter(**{field9: code}).count() + \
+                            section_cases.filter(**{field10: code}).count()
+                    counts[name] = count
+                    percents[name] = round((count * 100 / total), 0) if total else 0
+                return counts, percents
+            
+            def count_multiselect_defects(cases, fields, choices):
+                counts, percents = {}, {}
+                total = sum(
+                    1 for c in cases if any(getattr(c, f, None) for f in fields)
+                )
+
+                for code, name in choices:
+                    count = sum(
+                        1 for c in cases for f in fields
+                        if code in (getattr(c, f, []) or [])
+                    )
+                    counts[name] = count
+                    percents[name] = round((count * 100 / total), 0) if total else 0
+
+                return counts, percents
+
+            defect_counts, defect_percents = count_global_defects(
+                'defect_sheet', 'defect_sheet2', 'defect_sheet3', 'defect_sheet4', 'defect_sheet5', 'defect_sheet6', 'defect_sheet7', 'defect_sheet8', 'defect_sheet9', 'defect_sheet10', 
+                defect_sheet_choices, 'defect_sheet'
+            )
+
+            fields = [
+                'defect_type', 'defect_type2', 'defect_type3',
+                'defect_type4', 'defect_type5', 'defect_type6',
+                'defect_type7', 'defect_type8', 'defect_type9', 'defect_type10'
+            ]
+
+            defect_type_counts, defect_type_percents = count_multiselect_defects(
+                section_cases,
+                fields,
+                defect_type_choices
+            )
 
         context = {
             'doctors_count': doctors_count,
@@ -174,15 +301,21 @@ def main(request):
             'cases_count': cases_count,
             'section_cases_count': section_cases_count,
             'defect_section_cases_count': defect_section_cases_count,
+            'social_security_cases': social_security_cases,
+            'medical_services_cases': medical_services_cases,
+            'armed_forces_cases': armed_forces_cases,
+            'free_cases': free_cases,
             'room_cases_count': room_cases_count,
-            'sections': sections,
-            'rooms': rooms,
+            'sections': sections_recent,
+            'rooms': rooms_recent,
             'defect_counts': defect_counts,
             'defect_type_counts': defect_type_counts,
-            'most_doctor_room_list': most_doctor_room_list,
-            'most_doctor_bigroom_list': most_doctor_bigroom_list,
-            'most_doctor_mediumroom_list': most_doctor_mediumroom_list,
-            'most_doctor_smallroom_list': most_doctor_smallroom_list,
+            'defect_percents': defect_percents,
+            'defect_type_percents': defect_type_percents,
+            'most_doctor_room_list': most_common_or_none(doctor_room_list),
+            'most_doctor_bigroom_list': most_common_or_none(doctor_bigroom_list),
+            'most_doctor_mediumroom_list': most_common_or_none(doctor_mediumroom_list),
+            'most_doctor_smallroom_list': most_common_or_none(doctor_smallroom_list),
         }
 
         return render(request, 'main.html', context=context)
@@ -409,18 +542,38 @@ def main(request):
                                     patient_name = str(df.iloc[i, 8]).strip()
                                     delivery_date = str(df.iloc[i, 9]).strip()
                                     defect_sheet = str(df.iloc[i, 10]).strip()
-                                    defect_type = str(df.iloc[i, 11]).strip()
+                                    defect_type_raw = df.iloc[i, 11]
                                     defect_sheet2 = str(df.iloc[i, 12]).strip()
-                                    defect_type2 = str(df.iloc[i, 13]).strip()
+                                    defect_type2_raw = df.iloc[i, 13]
 
                                     section = Section.objects.filter(group=request.user.group, name=section_name).first()
                                     doctor = Doctor.objects.filter(group=request.user.group, full_name=doctor_name).first()
                                     rep_doctor = Doctor.objects.filter(group=request.user.group, full_name=rep_doctor_name).first()
                                     patient = Patient.objects.filter(group=request.user.group, full_name=patient_name).first()
                                     defect_sheet = defect_sheet_map.get(defect_sheet, None)
-                                    defect_type = defect_type_map.get(defect_type, None)
                                     defect_sheet2 = defect_sheet_map.get(defect_sheet2, None)
-                                    defect_type2 = defect_type_map.get(defect_type2, None)
+                                    defect_type_list = defect_type_raw if isinstance(defect_type_raw, list) else [defect_type_raw]
+                                    defect_type2_list = defect_type2_raw if isinstance(defect_type2_raw, list) else [defect_type2_raw]
+
+                                    defect_type_clean = [
+                                        defect_type_map.get(str(dt).strip(), None)
+                                        for dt in defect_type_list if dt is not None
+                                ]
+
+                                    defect_type2_clean = [
+                                        defect_type_map.get(str(dt).strip(), None)
+                                        for dt in defect_type2_list if dt is not None
+                                    ]
+
+                                    if defect_type_clean:
+                                        defect_type_summary = ', '.join([str(dt) for dt in defect_type_clean if dt is not None])
+                                    else:
+                                        defect_type_summary = ''
+
+                                    if defect_type2_clean:
+                                        defect_type2_summary = ', '.join([str(dt) for dt in defect_type2_clean if dt is not None])
+                                    else:
+                                        defect_type2_summary = ''
 
                                     SectionCase.objects.create(
                                         group=request.user.group,
@@ -434,9 +587,9 @@ def main(request):
                                         patient=patient,
                                         delivery_date=delivery_date,
                                         defect_sheet=defect_sheet,
-                                        defect_type=defect_type,
+                                        defect_type=defect_type_summary,
                                         defect_sheet2=defect_sheet2,
-                                        defect_type2=defect_type2
+                                        defect_type2=defect_type2_summary
                                     )
                                 except Exception as row_error:
                                     print(f" خطا در ردیف {i} از شیت {sheet}: {row_error}")
@@ -548,282 +701,141 @@ def main(request):
 @group_is_owner(Section, lookup_field='pk', group_field='group')
 def section_detail(request, pk):
     section = get_object_or_404(Section, pk=pk)
+    user_group = request.user.group
+    section_cases_all = SectionCase.objects.filter(group=user_group, section=section)
+    dc_section_cases_all = DC.objects.filter(group=user_group, hospitalization_section=section)
     doctors = section.doctor_sections.all()
-    doctors_count = doctors.count()
-    patients_count = section.patient_sections.all().count()
 
-    section_cases = SectionCase.objects.filter(group=request.user.group, section=section)
-    dc_section_cases = DC.objects.filter(group=request.user.group, hospitalization_section=section)
-    not_arrived_cases = SectionCase.objects.filter(group=request.user.group, section=section, delivery_date=None)
-
-    defect_cases = SectionCase.objects.filter(
-        group=request.user.group,
-        section=section
-    ).filter(
-        Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
-    )
-
-    social_security_cases = SectionCase.objects.filter(
-        group=request.user.group,
-        section=section
-    ).filter(
-        Q(insurance__icontains="تامین اجتماعی")
-    )
-
-    filtered_section_cases = []
-    filtered_dc_section_cases = []
-    filtered_not_arrived_cases = []
-    filtered_defect_cases = []
-    filtered_social_security_cases = []
-    arrive_daies = []
-    stay_daies = []
-    defect_counts = {}
-    defect_type_counts = {}
-    doctor_cases = {}
-    doctor_defects = {}
-
-    if request.GET.get("start") and request.GET.get("end"):
+    def to_date(date_str):
         try:
-            start = Persian(request.GET["start"]).gregorian_datetime()
-            end = Persian(request.GET["end"]).gregorian_datetime()
+            return Persian(date_str).gregorian_datetime() if isinstance(date_str, str) else None
+        except:
+            return None
 
-            if start > end:
-                start, end = end, start
-            
-            # استخراج پرونده های بخش در بازه زمانی
-            for section_case in section_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(section_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_section_cases.append(section_case)
-                    except:
-                        continue
+    start, end = None, None
+    if request.GET.get("start") and request.GET.get("end"):
+        start = to_date(request.GET["start"])
+        end = to_date(request.GET["end"])
+        if start and end and start > end:
+            start, end = end, start
 
-            # استخراج پرونده های فوت در بازه زمانی
-            for dc_section_case in dc_section_cases:
-                if isinstance(dc_section_case.admission_date, str):
-                    try:
-                        case_date = Persian(dc_section_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_dc_section_cases.append(dc_section_case)
-                    except:
-                        continue
+    def in_range(date):
+        return start <= date <= end if start and end and date else not start and not end
 
-            # استخراج پرونده های نرسیده بخش در بازه زمانی
-            for not_arrived_case in not_arrived_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(not_arrived_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_not_arrived_cases.append(not_arrived_case)
-                    except:
-                        continue
+    # فیلتر کردن بر اساس تاریخ پذیرش
+    section_cases = [sc for sc in section_cases_all if in_range(to_date(sc.admission_date))]
+    dc_section_cases = [dc for dc in dc_section_cases_all if in_range(to_date(dc.admission_date))]
+    not_arrived_cases = [sc for sc in section_cases_all if sc.delivery_date is None and in_range(to_date(sc.admission_date))]
 
-            # استخراج پرونده های ناقص بخش در بازه زمانی
-            for defect_case in defect_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(defect_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_defect_cases.append(defect_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های تامین اجتماعی بخش در بازه زمانی
-            for social_security_case in social_security_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(social_security_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_social_security_cases.append(social_security_case)
-                    except:
-                        continue
-            
-            # استخراج میانگین رسیدن پرونده های بازه زمانی بخش
-            for section_case in filtered_section_cases:
-                d_date = section_case.discharge_date
-                dl_date = section_case.delivery_date
+    defect_sheet_fields = ['defect_sheet'] + [f'defect_sheet{i}' for i in range(2, 11)]
+    defect_cases = [
+        sc for sc in section_cases
+        if any(getattr(sc, field) for field in defect_sheet_fields)
+    ]
 
-                if isinstance(d_date, str) and isinstance(dl_date, str):
-                    try:
-                        discharge_date = Persian(d_date).gregorian_datetime()
-                        delivery_date = Persian(dl_date).gregorian_datetime()
+    # فیلتر بر اساس بیمه
+    def filter_insurance(keyword):
+        return [sc for sc in section_cases if keyword in (sc.insurance or '')]
 
-                        arrive_day = (delivery_date - discharge_date).days
-                        arrive_daies.append(arrive_day)
-                    except Exception as e:
-                        continue
-            
-            # استخراج میانگین اقامت بیماران در پرونده های موجود در بازه زمانی بخش
-            for section_case in filtered_section_cases:
-                d_date = section_case.discharge_date
-                ad_date = section_case.admission_date
+    insurance_filters = {
+        'filtered_social_security_cases': 'تامین اجتماعی',
+        'filtered_medical_services_cases': 'خدمات درمانی',
+        'filtered_armed_forces_cases': 'نیرو های مسلح',
+        'filtered_free_cases': 'آزاد'
+    }
+    insurance_results = {key: filter_insurance(val) for key, val in insurance_filters.items()}
 
-                if isinstance(d_date, str) and isinstance(ad_date, str):
-                    try:
-                        discharge_date = Persian(d_date).gregorian_datetime()
-                        admission_date = Persian(ad_date).gregorian_datetime()
+    # آمار پزشکان
+    doctor_cases = defaultdict(int)
+    doctor_defects = defaultdict(int)
+    for doctor in doctors:
+        for sc in section_cases_all:
+            if sc.doctor == doctor and in_range(to_date(sc.admission_date)):
+                doctor_cases[doctor.full_name] += 1
+                if sc.defect_sheet or sc.defect_sheet2:
+                    doctor_defects[doctor.full_name] += 1
 
-                        stay_day = (discharge_date - admission_date).days
-                        stay_daies.append(stay_day)
-                    except Exception as e:
-                        continue
-            
-            # بررسی پراکندگی اوراق نقص پرونده های بازه زمانی بخش
-            for code, name in defect_sheet_choices:
-                count_sheet = 0
-                for section_case in filtered_section_cases:
-                    if section_case.defect_sheet==code:
-                        count_sheet += 1
-                    
-                    if section_case.defect_sheet2==code:
-                        count_sheet += 1
-                defect_counts[name] = count_sheet
-            
-            # بررسی پراکندگی انواع نقص پرونده های بازه زمانی بخش
-            for code, name in defect_type_choices:
-                count_sheet = 0
-                for section_case in filtered_section_cases:
-                    if section_case.defect_type==code:
-                        count_sheet += 1
-                    
-                    if section_case.defect_type2==code:
-                        count_sheet += 1
-                defect_type_counts[name] = count_sheet
-            
-            # بررسی تعداد پرونده های پزشکان بخش در بازه زمانی
-            # بررسی تعداد پرونده های نقص خورده پزشکان بخش در بازه زمانی
-            for doctor in doctors:
-                in_time_doctor_cases = SectionCase.objects.filter(group=request.user.group, section=section, doctor=doctor)
-                in_time_doctor_defects = SectionCase.objects.filter(
-                    group=request.user.group,
-                    section=section,
-                    doctor=doctor
-                ).filter(
-                    Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
-                )
+    # محاسبه متوسط اقامت و تحویل
+    arrive_days, stay_days = [], []
+    for sc in section_cases:
+        discharge = to_date(sc.discharge_date)
+        delivery = to_date(sc.delivery_date)
+        admission = to_date(sc.admission_date)
+        if discharge and delivery:
+            arrive_days.append((delivery - discharge).days)
+        if discharge and admission:
+            stay_days.append((discharge - admission).days)
 
-                num_doctor_cases = 0
-                for in_time_doctor_case in in_time_doctor_cases:
-                    if isinstance(in_time_doctor_case.admission_date, str):
-                        try:
-                            case_date = Persian(in_time_doctor_case.admission_date).gregorian_datetime()
-                            if start <= case_date <= end:
-                                num_doctor_cases += 1
-                        except:
-                            continue
-                doctor_cases[doctor.full_name] = num_doctor_cases
+    avg_arrive = round(sum(arrive_days) / len(arrive_days), 0) if arrive_days else '0'
+    avg_stay = round(sum(stay_days) / len(stay_days), 0) if stay_days else '0'
 
-                num_doctor_defects = 0
-                for in_time_doctor_defect in in_time_doctor_defects:
-                    if isinstance(in_time_doctor_defect.admission_date, str):
-                        try:
-                            case_date = Persian(in_time_doctor_defect.admission_date).gregorian_datetime()
-                            if start <= case_date <= end:
-                                num_doctor_defects += 1
-                        except:
-                            continue
-                doctor_defects[doctor.full_name] = num_doctor_defects
-        except Exception as e:
-            print("Error converting dates:", e)
-    else:
-        # اگر بازه انتخاب نشود کل پرونده های بخش بررسی می شود
-        filtered_section_cases = section_cases
-        filtered_dc_section_cases = dc_section_cases
-        filtered_not_arrived_cases = not_arrived_cases
-        filtered_defect_cases = defect_cases
-        filtered_social_security_cases = social_security_cases
+    # آمار نقص‌ها
+    defect_sheet_fields = ['defect_sheet'] + [f'defect_sheet{i}' for i in range(2, 11)]
+    defect_type_fields = ['defect_type'] + [f'defect_type{i}' for i in range(2, 11)]
 
-        # استخراج میانگین رسیدن پرونده های بخش
-        for section_case in section_cases:
-            d_date = section_case.discharge_date
-            dl_date = section_case.delivery_date
+    defect_counts = {
+        name: sum([
+            1 for sc in section_cases
+            if any(getattr(sc, field) == code for field in defect_sheet_fields)
+        ]) for code, name in defect_sheet_choices
+    }
 
-            if isinstance(d_date, str) and isinstance(dl_date, str):
-                try:
-                    discharge_date = Persian(d_date).gregorian_datetime()
-                    delivery_date = Persian(dl_date).gregorian_datetime()
+    defect_type_counts = {
+        name: sum([
+            1 for sc in section_cases
+            if any(
+                getattr(sc, field) and code in getattr(sc, field)
+                for field in defect_type_fields
+            )
+        ]) for code, name in defect_type_choices
+    }
 
-                    arrive_day = (delivery_date - discharge_date).days
-                    arrive_daies.append(arrive_day)
-                except Exception as e:
-                    continue
-        
-        # استخراج میانگین اقامت بیماران در پرونده های موجود در بخش
-        for section_case in section_cases:
-            d_date = section_case.discharge_date
-            ad_date = section_case.admission_date
+    # آمار سن و جنسیت فوتی‌ها
+    age_counts = {'less_20': 0, 'more_20_less_40': 0, 'more_40_less_60': 0, 'more_60_less_80': 0, 'more_80': 0}
+    gender_counts = {'men': 0, 'women': 0}
+    for dc in dc_section_cases:
+        age = int(''.join(filter(str.isdigit, dc.age or '0')))
+        if age < 20:
+            age_counts['less_20'] += 1
+        elif age < 40:
+            age_counts['more_20_less_40'] += 1
+        elif age < 60:
+            age_counts['more_40_less_60'] += 1
+        elif age < 80:
+            age_counts['more_60_less_80'] += 1
+        else:
+            age_counts['more_80'] += 1
+        gender_counts['men' if dc.gender == '1' else 'women'] += 1
 
-            if isinstance(d_date, str) and isinstance(ad_date, str):
-                try:
-                    discharge_date = Persian(d_date).gregorian_datetime()
-                    admission_date = Persian(ad_date).gregorian_datetime()
-
-                    stay_day = (discharge_date - admission_date).days
-                    stay_daies.append(stay_day)
-                except Exception as e:
-                    continue
-        
-        # بررسی پراکندگی اوراق نقص پرونده های بخش
-        for code, name in defect_sheet_choices:
-            count_sheet1 = SectionCase.objects.filter(group=request.user.group, section=section, defect_sheet=code).count()
-            count_sheet2 = SectionCase.objects.filter(group=request.user.group, section=section, defect_sheet2=code).count()
-            defect_counts[name] = count_sheet1 + count_sheet2
-
-        # بررسی پراکندگی انواع نقص پرونده های بخش
-        for code, name in defect_type_choices:
-                count_sheet1 = SectionCase.objects.filter(group=request.user.group, section=section, defect_type=code).count()
-                count_sheet2 = SectionCase.objects.filter(group=request.user.group, section=section, defect_type2=code).count()
-                defect_type_counts[name] = count_sheet1 + count_sheet2
-
-        # برداشت تعداد پرونده های پزشکان در این بخش
-        for doctor in doctors:
-            doctor_cases[doctor.full_name] = SectionCase.objects.filter(group=request.user.group, section=section, doctor=doctor).count()
-            doctor_defects[doctor.full_name] = SectionCase.objects.filter(
-                group=request.user.group,
-                section=section,
-                doctor=doctor
-            ).filter(
-                Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
-            ).count()
-
-    # بررسی شمار پرونده ها یا میانگین مدت زمان ها
-    filtered_section_cases_count = len(filtered_section_cases)
-    filtered_dc_section_cases_count = len(filtered_dc_section_cases)
-    filtered_not_arrived_cases_count = len(filtered_not_arrived_cases)
-    filtered_defect_cases_count = len(filtered_defect_cases)
-    filtered_social_security_cases_count = len(filtered_social_security_cases)
-
-    if arrive_daies:
-        average_arrive_daies = round(sum(arrive_daies) / len(arrive_daies), 0)
-    else:
-        average_arrive_daies = '0'
-    
-    if stay_daies:
-        average_stay_daies = round(sum(stay_daies) / len(stay_daies), 0)
-    else:
-        average_stay_daies = '0'
+    # Pagination helper
+    def paginate(request, objects_list, per_page=100, name='page'):
+        paginator = Paginator(objects_list, per_page)
+        page_number = request.GET.get(name)
+        return paginator.get_page(page_number)
 
     context = {
         'section': section,
-        'doctors_count': doctors_count,
-        'patients_count': patients_count,
-        'filtered_section_cases': filtered_section_cases,
-        'filtered_dc_section_cases_count': filtered_dc_section_cases_count,
-        'filtered_not_arrived_cases': filtered_not_arrived_cases,
-        'filtered_section_cases_count': filtered_section_cases_count,
-        'filtered_not_arrived_cases_count': filtered_not_arrived_cases_count,
-        'filtered_defect_cases_count': filtered_defect_cases_count,
-        'filtered_social_security_cases_count': filtered_social_security_cases_count,
-        'average_arrive_daies': average_arrive_daies,
-        'average_stay_daies': average_stay_daies,
+        'doctors_count': len(set(sc.doctor for sc in section_cases if sc.doctor)),
+        'patients_count': len(set(sc.patient for sc in section_cases if sc.patient)),
+        'filtered_section_cases': paginate(request, section_cases, name='sc_page'),
+        'filtered_section_cases_count': len(section_cases),
+        'filtered_dc_section_cases': paginate(request, dc_section_cases, name='dc_page'),
+        'filtered_dc_section_cases_count': len(dc_section_cases),
+        'filtered_not_arrived_cases': paginate(request, not_arrived_cases, name='nc_page'),
+        'filtered_not_arrived_cases_count': len(not_arrived_cases),
+        'filtered_defect_cases': paginate(request, defect_cases, name='defc_page'),
+        'filtered_defect_cases_count': len(defect_cases),
+        **{key: val for key, val in insurance_results.items()},
+        **{f'{key}_count': len(val) for key, val in insurance_results.items()},
+        'average_arrive_daies': avg_arrive,
+        'average_stay_daies': avg_stay,
         'defect_counts': defect_counts,
         'defect_type_counts': defect_type_counts,
-        'doctor_cases': doctor_cases,
-        'doctor_defects': doctor_defects,
+        'doctor_cases': dict(doctor_cases),
+        'doctor_defects': dict(doctor_defects),
+        'age_counts': age_counts,
+        'gender_counts': gender_counts,
     }
-
     return render(request, 'section_detail.html', context)
 
 @login_required
@@ -831,110 +843,77 @@ def section_detail(request, pk):
 @group_is_owner(Room, lookup_field='pk', group_field='group')
 def room_detail(request, pk):
     room = get_object_or_404(Room, pk=pk)
-    doctors = room.doctor_rooms.all()
-    doctors_count = doctors.count()
-    patients_count = room.patient_rooms.all().count()
-    room_cases = RoomCase.objects.filter(group=request.user.group, room=room)
-    big_room_cases = RoomCase.objects.filter(group=request.user.group, room=room, operation_type='3')
-    medium_room_cases = RoomCase.objects.filter(group=request.user.group, room=room, operation_type='2')
-    small_room_cases = RoomCase.objects.filter(group=request.user.group, room=room, operation_type='1')
+    group = request.user.group
 
-    filtered_room_cases = []
-    filtered_big_room_cases = []
-    filtered_medium_room_cases = []
-    filtered_small_room_cases = []
+    room_cases = RoomCase.objects.filter(group=group, room=room)
+    doctors = room.doctor_rooms.all()
+    patients = set(room_cases.values_list('patient', flat=True))
+    doctors_count = doctors.count()
+    patients_count = len(patients)
+
+    def to_gregorian(date_str):
+        try:
+            return Persian(date_str).gregorian_datetime()
+        except:
+            return None
+
+    def filter_by_date(queryset):
+        return [
+            case for case in queryset
+            if isinstance(case.operation_date, str)
+            and (dt := to_gregorian(case.operation_date))
+            and start <= dt <= end
+        ]
+
     doctor_cases = {}
+    filtered_room_cases = list(room_cases)
+    filtered_big_room_cases = room_cases.filter(operation_type='3')
+    filtered_medium_room_cases = room_cases.filter(operation_type='2')
+    filtered_small_room_cases = room_cases.filter(operation_type='1')
 
     if request.GET.get("start") and request.GET.get("end"):
         try:
-            start = Persian(request.GET["start"]).gregorian_datetime()
-            end = Persian(request.GET["end"]).gregorian_datetime()
-
-            if start > end:
+            start = to_gregorian(request.GET["start"])
+            end = to_gregorian(request.GET["end"])
+            if start and end and start > end:
                 start, end = end, start
 
-            # استخراج پرونده های اتاق عمل در بازه زمانی
-            for room_case in room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های عمل بزرگ اتاق عمل در بازه زمانی
-            for room_case in big_room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_big_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های عمل متوسط اتاق عمل در بازه زمانی
-            for room_case in medium_room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_medium_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های عمل کوچک اتاق عمل در بازه زمانی
-            for room_case in small_room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_small_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # بررسی تعداد پرونده های پزشکان اتاق عمل در بازه زمانی
+            filtered_room_cases = filter_by_date(room_cases)
+            filtered_big_room_cases = filter_by_date(filtered_big_room_cases)
+            filtered_medium_room_cases = filter_by_date(filtered_medium_room_cases)
+            filtered_small_room_cases = filter_by_date(filtered_small_room_cases)
+
+            doctors_count = len(set(c.doctor for c in filtered_room_cases))
+            patients_count = len(set(c.patient for c in filtered_room_cases))
+
             for doctor in doctors:
-                in_time_doctor_cases = RoomCase.objects.filter(group=request.user.group, room=room, doctor=doctor)
-
-                num_doctor_cases = 0
-                for in_time_doctor_case in in_time_doctor_cases:
-                    if isinstance(in_time_doctor_case.operation_date, str):
-                        try:
-                            case_date = Persian(in_time_doctor_case.operation_date).gregorian_datetime()
-                            if start <= case_date <= end:
-                                num_doctor_cases += 1
-                        except:
-                            continue
-                doctor_cases[doctor.full_name] = num_doctor_cases
-        except Exception as e:
-            print("Error converting dates:", e)
+                doctor_cases[doctor.full_name] = len([
+                    c for c in filtered_room_cases if c.doctor == doctor
+                ])
+        except:
+            pass
     else:
-        filtered_room_cases = room_cases
-        filtered_big_room_cases = big_room_cases
-        filtered_medium_room_cases = medium_room_cases
-        filtered_small_room_cases = small_room_cases
-
-        # برداشت تعداد پرونده های پزشکان در این اتاق عمل
         for doctor in doctors:
-            doctor_cases[doctor.full_name] = RoomCase.objects.filter(group=request.user.group, room=room, doctor=doctor).count()
+            doctor_cases[doctor.full_name] = room_cases.filter(doctor=doctor).count()
     
-    filtered_room_cases_count = len(filtered_room_cases)
-    filtered_big_room_cases_count = len(filtered_big_room_cases)
-    filtered_medium_room_cases_count = len(filtered_medium_room_cases)
-    filtered_small_room_cases_count = len(filtered_small_room_cases)
+    # Pagination helper
+    def paginate(request, objects_list, per_page=100, name='page'):
+        paginator = Paginator(objects_list, per_page)
+        page_number = request.GET.get(name)
+        return paginator.get_page(page_number)
 
     context = {
         'room': room,
         'doctors_count': doctors_count,
         'patients_count': patients_count,
-        'filtered_room_cases_count': filtered_room_cases_count,
-        'filtered_big_room_cases_count': filtered_big_room_cases_count,
-        'filtered_medium_room_cases_count': filtered_medium_room_cases_count,
-        'filtered_small_room_cases_count': filtered_small_room_cases_count,
+        'filtered_room_cases': paginate(request, filtered_room_cases, name='rc'),
+        'filtered_room_cases_count': len(filtered_room_cases),
+        'filtered_big_room_cases_count': len(filtered_big_room_cases),
+        'filtered_medium_room_cases_count': len(filtered_medium_room_cases),
+        'filtered_small_room_cases_count': len(filtered_small_room_cases),
         'doctor_cases': doctor_cases,
     }
-    
+
     return render(request, 'room_detail.html', context)
 
 @login_required
@@ -942,326 +921,183 @@ def room_detail(request, pk):
 @group_is_owner(Doctor, lookup_field='pk', group_field='group')
 def doctor_detail(request, pk):
     doctor = get_object_or_404(Doctor, pk=pk)
-    section_cases = SectionCase.objects.filter(group=request.user.group, doctor=doctor)
-    dc_section_cases = DC.objects.filter(group=request.user.group, doctor=doctor)
-    room_cases = RoomCase.objects.filter(group=request.user.group, doctor=doctor)
-    big_room_cases = RoomCase.objects.filter(group=request.user.group, doctor=doctor, operation_type='3')
-    medium_room_cases = RoomCase.objects.filter(group=request.user.group, doctor=doctor, operation_type='2')
-    small_room_cases = RoomCase.objects.filter(group=request.user.group, doctor=doctor, operation_type='1')
+    group = request.user.group
 
-    not_arrived_cases = SectionCase.objects.filter(group=request.user.group, doctor=doctor, delivery_date=None)
+    def to_gregorian(date_str):
+        try:
+            return Persian(date_str).gregorian_datetime()
+        except:
+            return None
 
-    defect_cases = SectionCase.objects.filter(
-        group=request.user.group,
-        doctor=doctor
-    ).filter(
+    def filter_by_date(queryset, date_field):
+        result = []
+        for obj in queryset:
+            date_value = getattr(obj, date_field)
+            if isinstance(date_value, str):
+                case_date = to_gregorian(date_value)
+                if case_date and start <= case_date <= end:
+                    result.append(obj)
+        return result
+
+    section_cases = SectionCase.objects.filter(group=group, doctor=doctor)
+    dc_section_cases = DC.objects.filter(group=group, doctor=doctor)
+    room_cases = RoomCase.objects.filter(group=group, doctor=doctor)
+    big_room_cases = room_cases.filter(operation_type='3')
+    medium_room_cases = room_cases.filter(operation_type='2')
+    small_room_cases = room_cases.filter(operation_type='1')
+
+    not_arrived_cases = section_cases.filter(delivery_date=None)
+
+    defect_cases = section_cases.filter(
+        Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
+    )
+    all_defect_cases = SectionCase.objects.filter(group=group).filter(
         Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
     )
 
-    all_defect_cases = SectionCase.objects.filter(
-        Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
-    ).filter(group=request.user.group)
+    insurance_filter = lambda s: section_cases.filter(insurance__icontains=s)
+    social_security_cases = insurance_filter("تامین اجتماعی")
+    medical_services_cases = insurance_filter("خدمات درمانی")
+    armed_forces_cases = insurance_filter("نیرو های مسلح")
+    free_cases = insurance_filter("آزاد")
 
-    social_security_cases = SectionCase.objects.filter(
-        group=request.user.group,
-        doctor=doctor
-    ).filter(
-        Q(insurance__icontains="تامین اجتماعی")
-    )
-
-    patients = []
-    filtered_section_cases = []
-    filtered_dc_section_cases = []
-    filtered_not_arrived_cases = []
-    filtered_defect_cases = []
-    filtered_all_defect_cases = []
-    filtered_social_security_cases = []
-    filtered_room_cases = []
-    filtered_big_room_cases = []
-    filtered_medium_room_cases = []
-    filtered_small_room_cases = []
-    arrive_daies = []
-    stay_daies = []
-    defect_counts = {}
-    defect_type_counts = {}
-
-    for section_case in section_cases:
-        patient = section_case.patient
-        if patient in patients:
-            pass
-        else:
-            patients.append(patient)
-    
-    for room_case in room_cases:
-        patient = room_case.patient
-        if patient in patients:
-            pass
-        else:
-            patients.append(patient)
-    
+    patients = set(section_cases.values_list('patient', flat=True)) | set(room_cases.values_list('patient', flat=True))
     patients_count = len(patients)
+
+    # فیلتر زمانی
+    filtered_section_cases = section_cases
+    filtered_dc_section_cases = dc_section_cases
+    filtered_not_arrived_cases = not_arrived_cases
+    filtered_defect_cases = defect_cases
+    filtered_all_defect_cases = all_defect_cases
+    filtered_social_security_cases = social_security_cases
+    filtered_medical_services_cases = medical_services_cases
+    filtered_armed_forces_cases = armed_forces_cases
+    filtered_free_cases = free_cases
+    filtered_room_cases = room_cases
+    filtered_big_room_cases = big_room_cases
+    filtered_medium_room_cases = medium_room_cases
+    filtered_small_room_cases = small_room_cases
 
     if request.GET.get("start") and request.GET.get("end"):
         try:
-            start = Persian(request.GET["start"]).gregorian_datetime()
-            end = Persian(request.GET["end"]).gregorian_datetime()
+            start = to_gregorian(request.GET["start"])
+            end = to_gregorian(request.GET["end"])
 
-            if start > end:
+            if start and end and start > end:
                 start, end = end, start
 
-            # استخراج پرونده های پزشک در بازه زمانی
-            for section_case in section_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(section_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_section_cases.append(section_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های فوت در بازه زمانی
-            for section_case in dc_section_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(section_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_dc_section_cases.append(section_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های نرسیده پزشک در بازه زمانی
-            for not_arrived_case in not_arrived_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(not_arrived_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_not_arrived_cases.append(not_arrived_case)
-                    except:
-                        continue
+            filtered_section_cases = filter_by_date(section_cases, 'admission_date')
+            filtered_dc_section_cases = filter_by_date(dc_section_cases, 'admission_date')
+            filtered_not_arrived_cases = filter_by_date(not_arrived_cases, 'admission_date')
+            filtered_defect_cases = filter_by_date(defect_cases, 'admission_date')
+            filtered_all_defect_cases = filter_by_date(all_defect_cases, 'admission_date')
+            filtered_social_security_cases = filter_by_date(social_security_cases, 'admission_date')
+            filtered_medical_services_cases = filter_by_date(medical_services_cases, 'admission_date')
+            filtered_armed_forces_cases = filter_by_date(armed_forces_cases, 'admission_date')
+            filtered_free_cases = filter_by_date(free_cases, 'admission_date')
+            filtered_room_cases = filter_by_date(room_cases, 'operation_date')
+            filtered_big_room_cases = filter_by_date(big_room_cases, 'operation_date')
+            filtered_medium_room_cases = filter_by_date(medium_room_cases, 'operation_date')
+            filtered_small_room_cases = filter_by_date(small_room_cases, 'operation_date')
 
-            # استخراج پرونده های ناقص پزشک در بازه زمانی
-            for defect_case in defect_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(defect_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_defect_cases.append(defect_case)
-                    except:
-                        continue
-            
-            # استخراج همه پرونده های ناقص پزشک در بازه زمانی
-            for all_defect_case in all_defect_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(defect_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_all_defect_cases.append(all_defect_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های تامین اجتماعی پزشک در بازه زمانی
-            for social_security_case in social_security_cases:
-                if isinstance(section_case.admission_date, str):
-                    try:
-                        case_date = Persian(social_security_case.admission_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_social_security_cases.append(social_security_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های اتاق عمل در بازه زمانی
-            for room_case in room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های عمل بزرگ اتاق عمل در بازه زمانی
-            for room_case in big_room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_big_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های عمل متوسط اتاق عمل در بازه زمانی
-            for room_case in medium_room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_medium_room_cases.append(room_case)
-                    except:
-                        continue
-            
-            # استخراج پرونده های عمل کوچک اتاق عمل در بازه زمانی
-            for room_case in small_room_cases:
-                if isinstance(room_case.operation_date, str):
-                    try:
-                        case_date = Persian(room_case.operation_date).gregorian_datetime()
-                        if start <= case_date <= end:
-                            filtered_small_room_cases.append(room_case)
-                    except:
-                        continue
+            f_patients = set(c.patient for c in filtered_section_cases + filtered_room_cases)
+            patients_count = len(f_patients)
 
-            # استخراج میانگین رسیدن پرونده های بازه زمانی دکتر
-            for section_case in filtered_section_cases:
-                d_date = section_case.discharge_date
-                dl_date = section_case.delivery_date
-
-                if isinstance(d_date, str) and isinstance(dl_date, str):
-                    try:
-                        discharge_date = Persian(d_date).gregorian_datetime()
-                        delivery_date = Persian(dl_date).gregorian_datetime()
-
-                        arrive_day = (delivery_date - discharge_date).days
-                        arrive_daies.append(arrive_day)
-                    except Exception as e:
-                        continue
-            
-            # استخراج میانگین اقامت بیماران در پرونده های موجود در بازه زمانی دکتر
-            for section_case in filtered_section_cases:
-                d_date = section_case.discharge_date
-                ad_date = section_case.admission_date
-
-                if isinstance(d_date, str) and isinstance(ad_date, str):
-                    try:
-                        discharge_date = Persian(d_date).gregorian_datetime()
-                        admission_date = Persian(ad_date).gregorian_datetime()
-
-                        stay_day = (discharge_date - admission_date).days
-                        stay_daies.append(stay_day)
-                    except Exception as e:
-                        continue
-
-            # بررسی پراکندگی انواع نقص پرونده های بازه زمانی دکتر
-            for code, name in defect_sheet_choices:
-                count_sheet = 0
-                for section_case in filtered_section_cases:
-                    if section_case.defect_sheet==code:
-                        count_sheet += 1
-                    
-                    if section_case.defect_sheet2==code:
-                        count_sheet += 1
-                defect_counts[name] = count_sheet
-            
-            # بررسی پراکندگی انواع نقص پرونده های بازه زمانی دکتر
-            for code, name in defect_type_choices:
-                count_sheet = 0
-                for section_case in filtered_section_cases:
-                    if section_case.defect_type==code:
-                        count_sheet += 1
-                    
-                    if section_case.defect_type2==code:
-                        count_sheet += 1
-                defect_type_counts[name] = count_sheet
         except Exception as e:
-            print("Error converting dates:", e)
-    else:
-        # اگر بازه انتخاب نشود کل پرونده های پزشک بررسی می شود
-        filtered_section_cases = section_cases
-        filtered_dc_section_cases = dc_section_cases
-        filtered_not_arrived_cases = not_arrived_cases
-        filtered_defect_cases = defect_cases
-        filtered_all_defect_cases = all_defect_cases
-        filtered_social_security_cases = social_security_cases
-        filtered_room_cases = room_cases
-        filtered_big_room_cases = big_room_cases
-        filtered_medium_room_cases = medium_room_cases
-        filtered_small_room_cases = small_room_cases
+            print("Error filtering by date range:", e)
 
-        # استخراج میانگین رسیدن پرونده های پزشک
-        for section_case in section_cases:
-            d_date = section_case.discharge_date
-            dl_date = section_case.delivery_date
+    def calc_average_days(cases, start_field, end_field):
+        days = []
+        for case in cases:
+            start_date = getattr(case, start_field)
+            end_date = getattr(case, end_field)
+            if isinstance(start_date, str) and isinstance(end_date, str):
+                start_dt = to_gregorian(start_date)
+                end_dt = to_gregorian(end_date)
+                if start_dt and end_dt:
+                    days.append((end_dt - start_dt).days)
+        return round(sum(days) / len(days), 0) if days else '0'
 
-            if isinstance(d_date, str) and isinstance(dl_date, str):
-                try:
-                    discharge_date = Persian(d_date).gregorian_datetime()
-                    delivery_date = Persian(dl_date).gregorian_datetime()
+    average_arrive_daies = calc_average_days(filtered_section_cases, 'discharge_date', 'delivery_date')
+    average_stay_daies = calc_average_days(filtered_section_cases, 'admission_date', 'discharge_date')
 
-                    arrive_day = (delivery_date - discharge_date).days
-                    arrive_daies.append(arrive_day)
-                except Exception as e:
-                    continue
-        
-        # استخراج میانگین اقامت بیماران در پرونده های موجود در پزشک
-        for section_case in section_cases:
-            d_date = section_case.discharge_date
-            ad_date = section_case.admission_date
+    # درصد نقص
+    percent_defect_cases = (
+        (len(filtered_defect_cases) * 100) // len(filtered_all_defect_cases)
+        if filtered_all_defect_cases else '0'
+    )
 
-            if isinstance(d_date, str) and isinstance(ad_date, str):
-                try:
-                    discharge_date = Persian(d_date).gregorian_datetime()
-                    admission_date = Persian(ad_date).gregorian_datetime()
+    # پراکندگی نقص
+    def count_defects(cases, field_names, choices):
+        counts = {}
+        for code, name in choices:
+            total = sum(
+                1 for case in cases
+                if any(getattr(case, field) == code for field in field_names)
+            )
+            counts[name] = total
+        return counts
 
-                    stay_day = (discharge_date - admission_date).days
-                    stay_daies.append(stay_day)
-                except Exception as e:
-                    continue
-        
-        # بررسی پراکندگی اوراق نقص پرونده های دکتر
-        for code, name in defect_sheet_choices:
-            count_sheet1 = SectionCase.objects.filter(group=request.user.group, doctor=doctor, defect_sheet=code).count()
-            count_sheet2 = SectionCase.objects.filter(group=request.user.group, doctor=doctor, defect_sheet2=code).count()
-            defect_counts[name] = count_sheet1 + count_sheet2
+    defect_counts = count_defects(filtered_section_cases, ['defect_sheet', 'defect_sheet2'], defect_sheet_choices)
+    defect_type_counts = count_defects(filtered_section_cases, ['defect_type', 'defect_type2'], defect_type_choices)
 
-        # بررسی پراکندگی انواع نقص پرونده های دکتر
-        for code, name in defect_type_choices:
-                count_sheet1 = SectionCase.objects.filter(group=request.user.group, doctor=doctor, defect_type=code).count()
-                count_sheet2 = SectionCase.objects.filter(group=request.user.group, doctor=doctor, defect_type2=code).count()
-                defect_type_counts[name] = count_sheet1 + count_sheet2
+    # آمار فوت‌شدگان
+    age_counts = {'less_20': 0, 'more_20_less_40': 0, 'more_40_less_60': 0, 'more_60_less_80': 0, 'more_80': 0}
+    gender_counts = {'men': 0, 'women': 0}
+
+    for case in filtered_dc_section_cases:
+        age = int(''.join(filter(str.isdigit, case.age or '0')))
+        gender = case.gender
+
+        if age < 20:
+            age_counts['less_20'] += 1
+        elif age < 40:
+            age_counts['more_20_less_40'] += 1
+        elif age < 60:
+            age_counts['more_40_less_60'] += 1
+        elif age < 80:
+            age_counts['more_60_less_80'] += 1
+        else:
+            age_counts['more_80'] += 1
+
+        if gender == '1':
+            gender_counts['men'] += 1
+        else:
+            gender_counts['women'] += 1
     
-    # بررسی شمار پرونده ها یا میانگین مدت زمان ها
-    filtered_section_cases_count = len(filtered_section_cases)
-    filtered_dc_section_cases_count = len(filtered_dc_section_cases)
-    filtered_not_arrived_cases_count = len(filtered_not_arrived_cases)
-    filtered_defect_cases_count = len(filtered_defect_cases)
-    filtered_social_security_cases_count = len(filtered_social_security_cases)
-    filtered_room_cases_count = len(filtered_room_cases)
-    filtered_big_room_cases_count = len(filtered_big_room_cases)
-    filtered_medium_room_cases_count = len(filtered_medium_room_cases)
-    filtered_small_room_cases_count = len(filtered_small_room_cases)
-
-    if arrive_daies:
-        average_arrive_daies = round(sum(arrive_daies) / len(arrive_daies), 0)
-    else:
-        average_arrive_daies = '0'
-    
-    if stay_daies:
-        average_stay_daies = round(sum(stay_daies) / len(stay_daies), 0)
-    else:
-        average_stay_daies = '0'
-    
-    if filtered_all_defect_cases:
-        percent_defect_cases = (len(filtered_defect_cases) * 100) // len(filtered_all_defect_cases)
-    else:
-        percent_defect_cases = '0'
+    # Pagination helper
+    def paginate(request, objects_list, per_page=100, name='page'):
+        paginator = Paginator(objects_list, per_page)
+        page_number = request.GET.get(name)
+        return paginator.get_page(page_number)
 
     context = {
         'doctor': doctor,
         'patients_count': patients_count,
-        'filtered_section_cases': filtered_section_cases,
-        'filtered_dc_section_cases_count': filtered_dc_section_cases_count,
-        'filtered_not_arrived_cases': filtered_not_arrived_cases,
-        'filtered_section_cases_count': filtered_section_cases_count,
-        'filtered_not_arrived_cases_count': filtered_not_arrived_cases_count,
-        'filtered_defect_cases_count': filtered_defect_cases_count,
-        'filtered_social_security_cases_count': filtered_social_security_cases_count,
-        'filtered_room_cases_count': filtered_room_cases_count,
-        'filtered_big_room_cases_count': filtered_big_room_cases_count,
-        'filtered_medium_room_cases_count': filtered_medium_room_cases_count,
-        'filtered_small_room_cases_count': filtered_small_room_cases_count,
+        'filtered_section_cases': paginate(request, section_cases, name='sc_page'),
+        'filtered_dc_section_cases': paginate(request, dc_section_cases, name='dc_page'),
+        'filtered_not_arrived_cases': paginate(request, not_arrived_cases, name='nc_page'),
+        'filtered_defect_cases': paginate(request, defect_cases, name='defc_page'),
+        'filtered_dc_section_cases_count': len(filtered_dc_section_cases),
+        'filtered_section_cases_count': len(filtered_section_cases),
+        'filtered_not_arrived_cases_count': len(filtered_not_arrived_cases),
+        'filtered_defect_cases_count': len(filtered_defect_cases),
+        'filtered_social_security_cases_count': len(filtered_social_security_cases),
+        'filtered_medical_services_cases_count': len(filtered_medical_services_cases),
+        'filtered_armed_forces_cases_count': len(filtered_armed_forces_cases),
+        'filtered_free_cases_count': len(filtered_free_cases),
+        'filtered_room_cases_count': len(filtered_room_cases),
+        'filtered_big_room_cases_count': len(filtered_big_room_cases),
+        'filtered_medium_room_cases_count': len(filtered_medium_room_cases),
+        'filtered_small_room_cases_count': len(filtered_small_room_cases),
         'average_arrive_daies': average_arrive_daies,
         'average_stay_daies': average_stay_daies,
         'defect_counts': defect_counts,
         'defect_type_counts': defect_type_counts,
         'percent_defect_cases': percent_defect_cases,
+        'age_counts': age_counts,
+        'gender_counts': gender_counts,
     }
 
     return render(request, 'doctor_detail.html', context)
@@ -1306,6 +1142,103 @@ def patient_detail(request, pk):
     }
 
     return render(request, 'patient_detail.html', context=context)
+
+@login_required
+@manager_required
+def dc_all_detail(request):
+    dc_cases = DC.objects.filter(group=request.user.group)
+    dc_doctors = []
+    dc_patients = []
+
+    def to_gregorian(date_str):
+        try:
+            return Persian(date_str).gregorian_datetime()
+        except:
+            return None
+    
+    def filter_by_date(queryset, date_field):
+        result = []
+        for obj in queryset:
+            date_value = getattr(obj, date_field)
+            if isinstance(date_value, str):
+                case_date = to_gregorian(date_value)
+                if case_date and start <= case_date <= end:
+                    result.append(obj)
+        return result
+
+    if request.GET.get("start") and request.GET.get("end"):
+        try:
+            start = to_gregorian(request.GET["start"])
+            end = to_gregorian(request.GET["end"])
+
+            if start and end and start > end:
+                start, end = end, start
+            
+            dc_cases = filter_by_date(dc_cases, 'admission_date')
+
+        except:
+            pass
+
+    def calc_average_days(cases, start_field, end_field):
+        days = []
+        for case in cases:
+            start_date = getattr(case, start_field)
+            end_date = getattr(case, end_field)
+            if isinstance(start_date, str) and isinstance(end_date, str):
+                start_dt = to_gregorian(start_date)
+                end_dt = to_gregorian(end_date)
+                if start_dt and end_dt:
+                    days.append((end_dt - start_dt).days)
+        return round(sum(days) / len(days), 0) if days else '0'
+
+    for dc_case in dc_cases:
+        dc_doctor = dc_case.doctor
+        dc_patient = dc_case.patient
+
+        if dc_doctor not in dc_doctors:
+            dc_doctors.append(dc_doctor)
+
+        if dc_patient not in dc_patients:
+            dc_patients.append(dc_patient)
+
+    average_arrive_daies = calc_average_days(dc_cases, 'death_date', 'delivery_date')
+    average_stay_daies = calc_average_days(dc_cases, 'admission_date', 'death_date')
+
+    # آمار فوت‌شدگان
+    age_counts = {'less_20': 0, 'more_20_less_40': 0, 'more_40_less_60': 0, 'more_60_less_80': 0, 'more_80': 0}
+    gender_counts = {'men': 0, 'women': 0}
+
+    for case in dc_cases:
+        age = int(''.join(filter(str.isdigit, case.age or '0')))
+        gender = case.gender
+
+        if age < 20:
+            age_counts['less_20'] += 1
+        elif age < 40:
+            age_counts['more_20_less_40'] += 1
+        elif age < 60:
+            age_counts['more_40_less_60'] += 1
+        elif age < 80:
+            age_counts['more_60_less_80'] += 1
+        else:
+            age_counts['more_80'] += 1
+
+        if gender == '1':
+            gender_counts['men'] += 1
+        else:
+            gender_counts['women'] += 1
+
+    context = {
+        'dc_cases_count': len(dc_cases),
+        'dc_doctors_count': len(dc_doctors),
+        'dc_patients_count': len(dc_patients),
+        'average_arrive_daies': average_arrive_daies,
+        'average_stay_daies': average_stay_daies,
+        'age_counts': age_counts,
+        'gender_counts': gender_counts,
+    }
+
+    return render(request, 'dc_all_detail.html', context)
 
 class SectionListView(LoginRequiredMixin, ManagerRequiredMixin, ListView):
     model = Section
@@ -1590,11 +1523,28 @@ class SectionCaseListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user_group = self.request.user.group
         queryset = super().get_queryset().filter(group=user_group).distinct()
+        start = self.request.GET.get('start')
+        end = self.request.GET.get('end')
         number = self.request.GET.get('number')
         search_query_admission_date = self.request.GET.get('admission_date')
         search_query_doctor = self.request.GET.get('doctor')
         search_query_section = self.request.GET.get('section')
 
+        if start and end:
+            start = Persian(start).gregorian_datetime()
+            end = Persian(end).gregorian_datetime()
+
+            filtered_queryset = []
+            for section_case in queryset:
+                if isinstance(section_case.admission_date, str):
+                    try:
+                        case_date = Persian(section_case.admission_date).gregorian_datetime()
+                        if start <= case_date <= end:
+                            filtered_queryset.append(section_case)
+                    except:
+                        continue
+
+            queryset = filtered_queryset
         if number:
             queryset = queryset.filter(Q(number__icontains=number))
         if search_query_admission_date:
@@ -1681,11 +1631,28 @@ class RoomCaseListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user_group = self.request.user.group
         queryset = super().get_queryset().filter(group=user_group).distinct()
+        start = self.request.GET.get('start')
+        end = self.request.GET.get('end')
         number = self.request.GET.get('number')
         search_query_admission_date = self.request.GET.get('operation_date')
         search_query_doctor = self.request.GET.get('doctor')
         search_query_section = self.request.GET.get('room')
 
+        if start and end:
+            start = Persian(start).gregorian_datetime()
+            end = Persian(end).gregorian_datetime()
+
+            filtered_queryset = []
+            for section_case in queryset:
+                if isinstance(section_case.operation_date, str):
+                    try:
+                        case_date = Persian(section_case.operation_date).gregorian_datetime()
+                        if start <= case_date <= end:
+                            filtered_queryset.append(section_case)
+                    except:
+                        continue
+
+            queryset = filtered_queryset
         if number:
             queryset = queryset.filter(Q(number__icontains=number))
         if search_query_admission_date:
@@ -1850,18 +1817,38 @@ def add_section_case(request):
                                 patient_name = str(df.iloc[i, 8]).strip()
                                 delivery_date = str(df.iloc[i, 9]).strip()
                                 defect_sheet = str(df.iloc[i, 10]).strip()
-                                defect_type = str(df.iloc[i, 11]).strip()
+                                defect_type_raw = df.iloc[i, 11]
                                 defect_sheet2 = str(df.iloc[i, 12]).strip()
-                                defect_type2 = str(df.iloc[i, 13]).strip()
+                                defect_type2_raw = df.iloc[i, 13]
 
                                 section = Section.objects.filter(group=request.user.group, name=section_name).first()
                                 doctor = Doctor.objects.filter(group=request.user.group, full_name=doctor_name).first()
                                 rep_doctor = Doctor.objects.filter(group=request.user.group, full_name=rep_doctor_name).first()
                                 patient = Patient.objects.filter(group=request.user.group, full_name=patient_name).first()
                                 defect_sheet = defect_sheet_map.get(defect_sheet, None)
-                                defect_type = defect_type_map.get(defect_type, None)
                                 defect_sheet2 = defect_sheet_map.get(defect_sheet2, None)
-                                defect_type2 = defect_type_map.get(defect_type2, None)
+                                defect_type_list = defect_type_raw if isinstance(defect_type_raw, list) else [defect_type_raw]
+                                defect_type2_list = defect_type2_raw if isinstance(defect_type2_raw, list) else [defect_type2_raw]
+
+                                defect_type_clean = [
+                                    defect_type_map.get(str(dt).strip(), None)
+                                    for dt in defect_type_list if dt is not None
+                                ]
+
+                                defect_type2_clean = [
+                                    defect_type_map.get(str(dt).strip(), None)
+                                    for dt in defect_type2_list if dt is not None
+                                ]
+
+                                if defect_type_clean:
+                                    defect_type_summary = ', '.join([str(dt) for dt in defect_type_clean if dt is not None])
+                                else:
+                                    defect_type_summary = ''
+
+                                if defect_type2_clean:
+                                    defect_type2_summary = ', '.join([str(dt) for dt in defect_type2_clean if dt is not None])
+                                else:
+                                    defect_type2_summary = ''
 
                                 SectionCase.objects.create(
                                     group=request.user.group,
@@ -1875,9 +1862,9 @@ def add_section_case(request):
                                     patient=patient,
                                     delivery_date=delivery_date,
                                     defect_sheet=defect_sheet,
-                                    defect_type=defect_type,
+                                    defect_type=defect_type_summary,
                                     defect_sheet2=defect_sheet2,
-                                    defect_type2=defect_type2
+                                    defect_type2=defect_type2_summary
                                 )
                             except Exception as row_error:
                                 print(f" خطا در ردیف {i} از شیت {sheet}: {row_error}")
@@ -2051,3 +2038,400 @@ def all_delete(request):
             return redirect('main')
 
     return render(request, 'all_delete_confirm.html', {'form': form})
+
+def analyze_section(section, group, start=None, end=None):
+    # اگه start و end وجود دارن، به میلادی تبدیل کن
+    try:
+        start_date = Persian(start).gregorian_datetime() if start else None
+        end_date = Persian(end).gregorian_datetime() if end else None
+    except:
+        start_date = end_date = None
+
+    def in_range(date_str):
+        try:
+            date = Persian(date_str).gregorian_datetime()
+            if start_date and end_date:
+                return start_date <= date <= end_date
+            return True
+        except:
+            return False
+
+    all_cases = SectionCase.objects.filter(group=group, section=section)
+    dc_cases = DC.objects.filter(group=group, hospitalization_section=section)
+    not_arrived = all_cases.filter(delivery_date=None)
+    defect_cases = all_cases.filter(Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False))
+
+    insurance_filters = {
+        'social_security': Q(insurance__icontains="تامین اجتماعی"),
+        'medical_services': Q(insurance__icontains="خدمات درمانی"),
+        'armed_forces': Q(insurance__icontains="نیرو های مسلح"),
+        'free': Q(insurance__icontains="آزاد"),
+    }
+
+    filtered = lambda qs: [obj for obj in qs if in_range(obj.admission_date)] if start_date and end_date else list(qs)
+
+    f_cases = filtered(all_cases)
+    f_dc = filtered(dc_cases)
+    f_not_arrived = filtered(not_arrived)
+    f_defects = filtered(defect_cases)
+
+    insurance_counts = {
+        key: len(filtered(all_cases.filter(q)))
+        for key, q in insurance_filters.items()
+    }
+
+    doctors = section.doctor_sections.all()
+    f_doctors = {c.doctor for c in f_cases if c.doctor}
+    f_patients = {c.patient for c in f_cases if c.patient}
+    doctors_count = len(f_doctors)
+    patients_count = len(f_patients)
+
+    arrive_days = []
+    stay_days = []
+    for case in f_cases:
+        try:
+            if case.discharge_date and case.delivery_date:
+                d = Persian(case.discharge_date).gregorian_datetime()
+                dl = Persian(case.delivery_date).gregorian_datetime()
+                arrive_days.append((dl - d).days)
+            if case.admission_date and case.discharge_date:
+                a = Persian(case.admission_date).gregorian_datetime()
+                d = Persian(case.discharge_date).gregorian_datetime()
+                stay_days.append((d - a).days)
+        except:
+            continue
+
+    average_arrive = round(sum(arrive_days) / len(arrive_days), 0) if arrive_days else 0
+    average_stay = round(sum(stay_days) / len(stay_days), 0) if stay_days else 0
+
+    defect_counts = {
+        name: sum(
+            1 for c in f_cases if c.defect_sheet == code or c.defect_sheet2 == code
+        ) for code, name in defect_sheet_choices
+    }
+
+    defect_type_counts = {
+        name: sum(
+            1 for c in f_cases if c.defect_type == code or c.defect_type2 == code
+        ) for code, name in defect_type_choices
+    }
+
+    doctor_cases = {}
+    doctor_defects = {}
+    for doc in doctors:
+        cases = SectionCase.objects.filter(group=group, section=section, doctor=doc)
+        cases = filtered(cases)
+        doctor_cases[doc.full_name] = len(cases)
+
+        defects = [c for c in cases if c.defect_sheet or c.defect_sheet2]
+        doctor_defects[doc.full_name] = len(defects)
+
+    age_buckets = {'less_20': 0, 'more_20_less_40': 0, 'more_40_less_60': 0, 'more_60_less_80': 0, 'more_80': 0}
+    gender_counts = {'men': 0, 'women': 0}
+    for c in f_dc:
+        try:
+            age = int(''.join(filter(str.isdigit, c.age or '0')))
+            if age < 20:
+                age_buckets['less_20'] += 1
+            elif age < 40:
+                age_buckets['more_20_less_40'] += 1
+            elif age < 60:
+                age_buckets['more_40_less_60'] += 1
+            elif age < 80:
+                age_buckets['more_60_less_80'] += 1
+            else:
+                age_buckets['more_80'] += 1
+
+            if c.gender == '1':
+                gender_counts['men'] += 1
+            else:
+                gender_counts['women'] += 1
+        except:
+            continue
+
+    return {
+        'section': section,
+        'doctors_count': doctors_count,
+        'patients_count': patients_count,
+        'filtered_section_cases_count': len(f_cases),
+        'filtered_dc_section_cases_count': len(f_dc),
+        'filtered_not_arrived_cases_count': len(f_not_arrived),
+        'filtered_defect_cases_count': len(f_defects),
+        'filtered_social_security_cases_count': insurance_counts['social_security'],
+        'filtered_medical_services_cases_count': insurance_counts['medical_services'],
+        'filtered_armed_forces_cases_count': insurance_counts['armed_forces'],
+        'filtered_free_cases_count': insurance_counts['free'],
+        'average_arrive_daies': average_arrive,
+        'average_stay_daies': average_stay,
+        'defect_counts': defect_counts,
+        'defect_type_counts': defect_type_counts,
+        'doctor_cases': doctor_cases,
+        'doctor_defects': doctor_defects,
+        'age_counts': age_buckets,
+        'gender_counts': gender_counts,
+    }
+
+def analyze_room(room, group, start=None, end=None):
+    try:
+        start_date = Persian(start).gregorian_datetime() if start else None
+        end_date = Persian(end).gregorian_datetime() if end else None
+    except:
+        start_date = end_date = None
+
+    def in_range(date_str):
+        try:
+            date = Persian(date_str).gregorian_datetime()
+            if start_date and end_date:
+                return start_date <= date <= end_date
+            return True
+        except:
+            return False
+
+    all_cases = RoomCase.objects.filter(group=group, room=room)
+    big_cases = all_cases.filter(operation_type='3')
+    medium_cases = all_cases.filter(operation_type='2')
+    small_cases = all_cases.filter(operation_type='1')
+
+    filtered = lambda qs: [obj for obj in qs if in_range(obj.operation_date)] if start_date and end_date else list(qs)
+
+    f_cases = filtered(all_cases)
+    f_big = filtered(big_cases)
+    f_medium = filtered(medium_cases)
+    f_small = filtered(small_cases)
+
+    f_doctors = {c.doctor for c in f_cases if c.doctor}
+    f_patients = {c.patient for c in f_cases if c.patient}
+
+    doctor_cases = {}
+    for doctor in room.doctor_rooms.all():
+        cases = RoomCase.objects.filter(group=group, room=room, doctor=doctor)
+        cases = filtered(cases)
+        doctor_cases[doctor.full_name] = len(cases)
+
+    return {
+        'room': room,
+        'doctors_count': len(f_doctors),
+        'patients_count': len(f_patients),
+        'filtered_room_cases_count': len(f_cases),
+        'filtered_big_room_cases_count': len(f_big),
+        'filtered_medium_room_cases_count': len(f_medium),
+        'filtered_small_room_cases_count': len(f_small),
+        'doctor_cases': doctor_cases,
+    }
+
+def analyze_doctor(doctor, group, start=None, end=None):
+    try:
+        start = Persian(start).gregorian_datetime() if start else None
+        end = Persian(end).gregorian_datetime() if end else None
+    except:
+        start = end = None
+
+    def to_gregorian(date_str):
+        try:
+            return Persian(date_str).gregorian_datetime()
+        except:
+            return None
+
+    def in_range(date_str):
+        date = to_gregorian(date_str)
+        if date and start and end:
+            return start <= date <= end
+        return True
+
+    def filter_by_date(qs, date_field):
+        return [obj for obj in qs if in_range(getattr(obj, date_field))]
+
+    def calc_average_days(cases, start_field, end_field):
+        days = []
+        for case in cases:
+            start_date = getattr(case, start_field)
+            end_date = getattr(case, end_field)
+            if isinstance(start_date, str) and isinstance(end_date, str):
+                start_dt = to_gregorian(start_date)
+                end_dt = to_gregorian(end_date)
+                if start_dt and end_dt:
+                    days.append((end_dt - start_dt).days)
+        return round(sum(days) / len(days), 0) if days else 0
+
+    section_cases = SectionCase.objects.filter(group=group, doctor=doctor)
+    dc_section_cases = DC.objects.filter(group=group, doctor=doctor)
+    room_cases = RoomCase.objects.filter(group=group, doctor=doctor)
+    big_room_cases = room_cases.filter(operation_type='3')
+    medium_room_cases = room_cases.filter(operation_type='2')
+    small_room_cases = room_cases.filter(operation_type='1')
+
+    not_arrived_cases = section_cases.filter(delivery_date=None)
+
+    defect_cases = section_cases.filter(
+        Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
+    )
+    all_defect_cases = SectionCase.objects.filter(group=group).filter(
+        Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False)
+    )
+
+    insurance_filter = lambda s: section_cases.filter(insurance__icontains=s)
+    social_security_cases = insurance_filter("تامین اجتماعی")
+    medical_services_cases = insurance_filter("خدمات درمانی")
+    armed_forces_cases = insurance_filter("نیرو های مسلح")
+    free_cases = insurance_filter("آزاد")
+
+    # زمان‌بندی
+    if start and end and start > end:
+        start, end = end, start
+
+    filtered_section_cases = filter_by_date(section_cases, 'admission_date')
+    filtered_dc_section_cases = filter_by_date(dc_section_cases, 'admission_date')
+    filtered_not_arrived_cases = filter_by_date(not_arrived_cases, 'admission_date')
+    filtered_defect_cases = filter_by_date(defect_cases, 'admission_date')
+    filtered_all_defect_cases = filter_by_date(all_defect_cases, 'admission_date')
+    filtered_social_security_cases = filter_by_date(social_security_cases, 'admission_date')
+    filtered_medical_services_cases = filter_by_date(medical_services_cases, 'admission_date')
+    filtered_armed_forces_cases = filter_by_date(armed_forces_cases, 'admission_date')
+    filtered_free_cases = filter_by_date(free_cases, 'admission_date')
+    filtered_room_cases = filter_by_date(room_cases, 'operation_date')
+    filtered_big_room_cases = filter_by_date(big_room_cases, 'operation_date')
+    filtered_medium_room_cases = filter_by_date(medium_room_cases, 'operation_date')
+    filtered_small_room_cases = filter_by_date(small_room_cases, 'operation_date')
+
+    f_patients = set(c.patient for c in filtered_section_cases + filtered_room_cases)
+    patients_count = len(f_patients)
+
+    # نقص
+    percent_defect_cases = (
+        (len(filtered_defect_cases) * 100) // len(filtered_all_defect_cases)
+        if filtered_all_defect_cases else 0
+    )
+
+    def count_defects(cases, field_names, choices):
+        counts = {}
+        for code, name in choices:
+            total = sum(
+                1 for case in cases
+                if any(getattr(case, field) == code for field in field_names)
+            )
+            counts[name] = total
+        return counts
+
+    defect_counts = count_defects(filtered_section_cases, ['defect_sheet', 'defect_sheet2'], defect_sheet_choices)
+    defect_type_counts = count_defects(filtered_section_cases, ['defect_type', 'defect_type2'], defect_type_choices)
+
+    # فوت‌شدگان
+    age_counts = {'less_20': 0, 'more_20_less_40': 0, 'more_40_less_60': 0, 'more_60_less_80': 0, 'more_80': 0}
+    gender_counts = {'men': 0, 'women': 0}
+
+    for case in filtered_dc_section_cases:
+        age = int(''.join(filter(str.isdigit, case.age or '0')))
+        gender = case.gender
+        if age < 20:
+            age_counts['less_20'] += 1
+        elif age < 40:
+            age_counts['more_20_less_40'] += 1
+        elif age < 60:
+            age_counts['more_40_less_60'] += 1
+        elif age < 80:
+            age_counts['more_60_less_80'] += 1
+        else:
+            age_counts['more_80'] += 1
+        if gender == '1':
+            gender_counts['men'] += 1
+        else:
+            gender_counts['women'] += 1
+
+    return {
+        'doctor': doctor,
+        'patients_count': patients_count,
+        'filtered_section_cases_count': len(filtered_section_cases),
+        'filtered_dc_section_cases_count': len(filtered_dc_section_cases),
+        'filtered_not_arrived_cases_count': len(filtered_not_arrived_cases),
+        'filtered_defect_cases_count': len(filtered_defect_cases),
+        'filtered_social_security_cases_count': len(filtered_social_security_cases),
+        'filtered_medical_services_cases_count': len(filtered_medical_services_cases),
+        'filtered_armed_forces_cases_count': len(filtered_armed_forces_cases),
+        'filtered_free_cases_count': len(filtered_free_cases),
+        'filtered_room_cases_count': len(filtered_room_cases),
+        'filtered_big_room_cases_count': len(filtered_big_room_cases),
+        'filtered_medium_room_cases_count': len(filtered_medium_room_cases),
+        'filtered_small_room_cases_count': len(filtered_small_room_cases),
+        'average_arrive_days': calc_average_days(filtered_section_cases, 'discharge_date', 'delivery_date'),
+        'average_stay_days': calc_average_days(filtered_section_cases, 'admission_date', 'discharge_date'),
+        'defect_counts': defect_counts,
+        'defect_type_counts': defect_type_counts,
+        'percent_defect_cases': percent_defect_cases,
+        'age_counts': age_counts,
+        'gender_counts': gender_counts,
+    }
+
+@login_required
+@manager_required
+def multi_section_analysis(request):
+    if request.method == 'POST':
+        form = MultiSectionForm(request.POST)
+        if form.is_valid():
+            sections = form.cleaned_data['sections']
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
+            
+            results = {}
+            for section in sections:
+                data = analyze_section(section, request.user.group, start, end)
+                results[section.name] = data
+            
+            context = {
+                'form': form,
+                'results': results,
+            }
+            return render(request, 'multi_section_results.html', context)
+    else:
+        form = MultiSectionForm()
+
+    return render(request, 'multi_section_form.html', {'form': form})
+
+@login_required
+@manager_required
+def multi_room_analysis(request):
+    if request.method == 'POST':
+        form = MultiRoomForm(request.POST)
+        if form.is_valid():
+            rooms = form.cleaned_data['rooms']
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
+            
+            results = {}
+            for room in rooms:
+                data = analyze_room(room, request.user.group, start, end)
+                results[room.name] = data
+            
+            context = {
+                'form': form,
+                'results': results,
+            }
+            return render(request, 'multi_room_results.html', context)
+    else:
+        form = MultiRoomForm()
+
+    return render(request, 'multi_room_form.html', {'form': form})
+
+@login_required
+@manager_required
+def multi_doctor_analysis(request):
+    if request.method == 'POST':
+        form = MultiDoctorForm(request.POST)
+        if form.is_valid():
+            doctors = form.cleaned_data['doctors']
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
+            
+            results = {}
+            for doctor in doctors:
+                data = analyze_doctor(doctor, request.user.group, start, end)
+                results[doctor.full_name] = data
+            
+            context = {
+                'form': form,
+                'results': results,
+            }
+            return render(request, 'multi_doctor_results.html', context)
+    else:
+        form = MultiDoctorForm()
+
+    return render(request, 'multi_doctor_form.html', {'form': form})

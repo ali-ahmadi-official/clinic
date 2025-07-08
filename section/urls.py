@@ -10,8 +10,9 @@ from .views import (
     PatientListView, patient_detail, PatientDeleteView,
     SectionCaseListView, add_section_case, section_case_detail, SectionCaseUpdateView, SectionCaseDeleteView,
     RoomCaseListView, add_room_case, RoomCaseDetailView, RoomCaseDeleteView,
-    DCListView, DCDetailView, DCDeleteView,
+    DCListView, DCDetailView, DCDeleteView, dc_all_detail,
     all_delete,
+    multi_section_analysis, multi_room_analysis, multi_doctor_analysis
 )
 
 urlpatterns = [
@@ -62,6 +63,11 @@ urlpatterns = [
     path('dcs/', DCListView.as_view(), name='dc_list'),
     path('dcs/<int:pk>/', DCDetailView.as_view(), name='dc_detail'),
     path('dcs/<int:pk>/delete/', DCDeleteView.as_view(), name='dc_delete'),
+    path('dcs/all-detail/', dc_all_detail, name='dc_all_detail'),
 
     path('all-delete/', all_delete, name='all_delete'),
+
+    path('analyze/section/', multi_section_analysis, name='analyze_section'),
+    path('analyze/room/', multi_room_analysis, name='analyze_room'),
+    path('analyze/doctor/', multi_doctor_analysis, name='analyze_doctor'),
 ]

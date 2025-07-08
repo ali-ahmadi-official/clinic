@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+فرم انتخاب اتاق عمل
+{% endblock %}
+
+{% block page1 %}
+مقایسه و آنالیز
+{% endblock %}
+
+{% block page2 %}
+فرم انتخاب اتاق عمل
+{% endblock %}
+
+{% block contain %}
+<div class="row" id="content_image">
+    <div class="col-12">
+        <h5>فرم انتخاب اتاق عمل</h5>
+        <form method="post" class="my-time" style="grid-template-columns: repeat(3, 1fr);"> {% csrf_token %}
+            {{ form.rooms }}
+            <input data-jdp title="از تاریخ" name="start" class="form-control w-40" placeholder="از تاریخ" style="width: 100% !important;"
+                value="{{ request.GET.start }}" autocomplete="off">
+            <input data-jdp title="تا تاریخ" name="end" class="form-control w-40" placeholder="تا تاریخ" style="width: 100% !important;"
+                value="{{ request.GET.end }}" autocomplete="off">
+            <button class="my-btn-time" style="grid-column: 1 / span 3; background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;">جستجو</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    jalaliDatepicker.startWatch();
+
+    const inputFile = document.getElementById('profile_image_input');
+    const previewImage = document.getElementById('profile_image_preview');
+    inputFile.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }); 
+</script>
+{% endblock %}
