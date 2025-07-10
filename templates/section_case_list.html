@@ -16,7 +16,7 @@
 {% block contain %}
 <div class="row">
     <div class="col-12">
-        <h5>فیلتر پرونده های بخش <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
+        <h5>جستجو پرونده های بخش <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
         <form method="get" class="my-form" style="grid-template-columns: repeat(4, 1fr);">
             <input data-jdp title="از تاریخ" name="start" class="form-control w-40" placeholder="از تاریخ" style="width: 100% !important;"
                 value="{{ request.GET.start }}" autocomplete="off">
@@ -44,6 +44,8 @@
                     </option>
                 {% endfor %}
             </select>
+            <input title="بیمار" name="patient" class="form-control w-40" placeholder="بیمار" style="width: 100% !important;"
+                value="{{ request.GET.patient }}">
 
             <button class="my-btn" style="grid-column: 2 / span 2; background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;">جستجو</button>
         </form>

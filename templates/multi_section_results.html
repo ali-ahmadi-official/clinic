@@ -14,6 +14,7 @@
 {% endblock %}
 
 {% block contain %}
+<div id="content_image">
 {% for section_name, data in results.items %}
 <div class="row" style="border-top: 5px solid #f97316; padding-bottom: 40px;">
     <h4 style="margin: 30px 0;">{{ section_name }}</h4>
@@ -23,7 +24,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار کل پزشکان</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد کل پزشکان</p>
                             <h5 class="font-weight-bolder mb-0">
                                 {{ data.doctors_count }}
                             </h5>
@@ -49,7 +50,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار کل بیماران</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد کل بیماران</p>
                             <h5 class="font-weight-bolder mb-0">
                                 {{ data.patients_count }}
                             </h5>
@@ -75,7 +76,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار پرونده های بخش</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد پرونده های بخش</p>
                             <h5 class="font-weight-bolder mb-0" id="total">
                                 {{ data.filtered_section_cases_count }}
                             </h5>
@@ -103,7 +104,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار پرونده های فوت</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد پرونده های فوت</p>
                             <h5 class="font-weight-bolder mb-0" id="total">
                                 {{ data.filtered_dc_section_cases_count }}
                             </h5>
@@ -131,7 +132,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار پرونده های نرسیده</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد پرونده های نرسیده</p>
                             <h5 class="font-weight-bolder mb-0" id="not_case">
                                 {{ data.filtered_not_arrived_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent1"></span>
@@ -160,7 +161,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار پرونده های ناقص</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد پرونده های ناقص</p>
                             <h5 class="font-weight-bolder mb-0" id="defect">
                                 {{ data.filtered_defect_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent2"></span>
@@ -189,7 +190,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار تامین اجتماعی</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد تامین اجتماعی</p>
                             <h5 class="font-weight-bolder mb-0" id="social_security">
                                 {{ data.filtered_social_security_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent3"></span>
@@ -218,7 +219,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار خدمات درمانی</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد خدمات درمانی</p>
                             <h5 class="font-weight-bolder mb-0" id="medical_service">
                                 {{ data.filtered_medical_services_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent4"></span>
@@ -247,7 +248,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار نیرو های مسلح</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد نیرو های مسلح</p>
                             <h5 class="font-weight-bolder mb-0" id="armed_force">
                                 {{ data.filtered_armed_forces_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent5"></span>
@@ -276,7 +277,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار بیمه آزاد</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد بیمه آزاد</p>
                             <h5 class="font-weight-bolder mb-0" id="free">
                                 {{ data.filtered_free_cases_count }}
                                 <span class="text-success text-sm font-weight-bolder" id="percent6"></span>
@@ -357,6 +358,137 @@
             </div>
         </div>
     </div>
+
+    <div class="row" style="padding-top: 20px; margin: auto;">
+        <div style="width: 48%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
+            <canvas id="{{ data.section.id }}barChart"></canvas>
+        </div>
+        <div style="width: 48%; margin: auto; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); background-color: #FBFBFB;">
+            <canvas id="{{ data.section.id }}barChartType"></canvas>
+        </div>
+    </div>
 </div>
+
+    <script>
+        var defectCounts = {{ data.defect_counts| safe }};
+        selfid = {{ data.section.id | safe }}
+        var ctx = document.getElementById(`${selfid}barChart`).getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'برگ پذیرش خلاصه ترخیص',
+                    'برگ خلاصه پرونده',
+                    'برگ شرح حال',
+                    'برگ سیربیماری',
+                    'برگ مشاوره',
+                    'برگ مراقبت قبل از عمل',
+                    'برگ بیهوشی',
+                    'برگ شرح عمل',
+                    'برگ مراقبت بعد از عمل',
+                    'دستورات پزشک',
+                    'گزارش پرستار',
+                    'نمودار علائم حیاتی',
+                    'رضایت آگاهانه',
+                    'صورتحساب',
+                    'چک لیست'
+                ],
+                datasets: [{
+                    label: 'پراکندگی اوراق نقص پرونده',
+                    data: Object.values(defectCounts),
+                    backgroundColor: [
+                        '#FF6384',   /* قرمز مایل به صورتی */
+                        '#36A2EB',   /* آبی روشن */
+                        '#FFCE56',   /* زرد طلایی */
+                        '#4BC0C0',   /* فیروزه‌ای */
+                        '#9966FF',   /* بنفش */
+                        '#FF9F40',   /* نارنجی */
+                        '#E7E9ED',   /* خاکستری روشن */
+                        '#8B0000',   /* قرمز تیره */
+                        '#00CED1',   /* آبی دریایی */
+                        '#228B22',   /* سبز جنگلی */
+                        '#FFD700',   /* طلایی */
+                        '#DC143C',   /* قرمز آتشین */
+                        '#00FF7F',   /* سبز بهاری */
+                        '#4682B4',   /* آبی فولادی */
+                        '#FF4500',   /* نارنجی تند */
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        var defect_type_counts = {{ data.defect_type_counts| safe }};
+        selfid = {{ data.section.id | safe }}
+        var ctx = document.getElementById(`${selfid}barChartType`).getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'عدم درج مهر پزشک',
+                    'مهر مشاوره',
+                    'مهر tellorder',
+                    'فقدان برگ',
+                    'عدم تکمیل گزارش',
+                    'خط خوردگی',
+                    'عدم تکمیل سربرگ',
+                    'عدم تشخیص نویسی',
+                    'عدم اخذ رضایت',
+                    'عدم اثر انگشت و امضا',
+                    'عدم ثبت دقیق آدرس و تلفن بیمار',
+                ],
+                datasets: [{
+                    label: 'پراکندگی نوع نقص پرونده',
+                    data: Object.values(defect_type_counts),
+                    backgroundColor: [
+                        '#FF6384',   /* قرمز مایل به صورتی */
+                        '#36A2EB',   /* آبی روشن */
+                        '#FFCE56',   /* زرد طلایی */
+                        '#4BC0C0',   /* فیروزه‌ای */
+                        '#9966FF',   /* بنفش */
+                        '#FF9F40',   /* نارنجی */
+                        '#E7E9ED',   /* خاکستری روشن */
+                        '#8B0000',   /* قرمز تیره */
+                        '#00CED1',   /* آبی دریایی */
+                        '#228B22',   /* سبز جنگلی */
+                        '#FFD700',   /* طلایی */
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 {% endfor %}
+<script>
+    function captureImage() {
+        const element = document.getElementById('content_image');
+
+        html2canvas(element, { scale: 2 }).then(canvas => {
+      
+            const link = document.createElement('a');
+            link.download = 'snapshot.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+</script>
+<div style="margin-top: 30px; width: 100%; display: flex; justify-content: center;">
+    <button class="my-btn-time" style="background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;" onclick="captureImage()">دانلود</button>
+</div>
+</div>
 {% endblock %}

@@ -16,7 +16,7 @@
 {% block contain %}
 <div class="row">
     <div class="col-12">
-        <h5>فیلتر پزشکان <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
+        <h5>جستجو پزشکان <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
         <form method="get" class="my-form">
             <input title="کد پرسنلی" type="number" name="personnel_code" class="form-control w-40" placeholder="کد پرسنلی" style="width: 100% !important;"
                 value="{{ request.GET.personnel_code }}">
@@ -37,7 +37,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0" style="display: flex; justify-content: space-between;">
-                <h6>لیست پزشکان</h6>
+                <h6>لیست پزشکان <span><a href="{% url 'analyze_doctor' %}" style="font-size: small; color: #f97316;">مقایسه و آنالیز</a></span></h6>
                 <button
                     style="background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
@@ -64,10 +64,7 @@
                                     کد پرسنلی</th>
                                 <th
                                     class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                    بخش ها</th>
-                                <th
-                                    class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                    اتاق های عمل</th>
+                                    درجه</th>
                                 <th
                                     class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                                     تخصص ها</th>
@@ -94,14 +91,11 @@
                                     {% endif %}
                                 </td>
                                 <td class="align-middle text-center">
-                                    {% for section in doctor.sections.all %}
-                                    <span class="text-secondary text-xs font-weight-bold">{{ section.name }},</span>
-                                    {% endfor %}
-                                </td>
-                                <td class="align-middle text-center">
-                                    {% for room in doctor.rooms.all %}
-                                    <span class="text-secondary text-xs font-weight-bold">{{ room.name }},</span>
-                                    {% endfor %}
+                                    {% if doctor.get_grade_display %}
+                                    <span class="text-secondary text-xs font-weight-bold">{{ doctor.get_grade_display }}</span>
+                                    {% else %}
+                                    <span class="text-secondary text-xs font-weight-bold">----</span>
+                                    {% endif %}
                                 </td>
                                 <td class="align-middle text-center">
                                     {% for expertise in doctor.expertises.all %}

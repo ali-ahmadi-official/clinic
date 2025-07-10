@@ -28110,3 +28110,44 @@ pre[class*=language-] {
   background-color: #FF3F33;
   font-size: smaller;
 }
+
+.checkbox-multiple {
+  background-color: white;  /* پس‌زمینه سفید */
+  max-height: 100px;        /* ارتفاع حداکثر */
+  overflow-y: auto;         /* اسکرول عمودی فعال میشه اگر ارتفاع بیشتر بشه */
+  padding: 10px;            /* فاصله داخلی برای زیبایی */
+  border: 1px solid #ccc;   /* یک کادر ملایم دورش */
+  border-radius: 4px;       /* گوشه‌های گرد */
+}
+
+.checkbox-multiple input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  margin-right: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.checkbox-multiple input[type="checkbox"]:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.checkbox-multiple input[type="checkbox"]:checked::after {
+  content: "✓";
+  color: white;
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 14px;
+  line-height: 18px;
+  user-select: none;
+}

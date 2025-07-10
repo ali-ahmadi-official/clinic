@@ -33,7 +33,7 @@ class SectionForm(forms.ModelForm):
         model = Section
         exclude = ('group',)
         widgets = {
-            'expertises': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'expertises': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         }
 
 class RoomForm(forms.ModelForm):
@@ -41,7 +41,7 @@ class RoomForm(forms.ModelForm):
         model = Room
         exclude = ('group',)
         widgets = {
-            'expertises': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'expertises': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         }
 
 class DoctorForm(forms.ModelForm):
@@ -50,9 +50,9 @@ class DoctorForm(forms.ModelForm):
         exclude = ('group',)
         widgets = {
             'grade': forms.Select(attrs={'class': 'form-control'}),
-            'sections': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'rooms': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'expertises': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'sections': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
+            'rooms': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
+            'expertises': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         }
 
 class SectionCaseForm(forms.ModelForm):
@@ -66,25 +66,25 @@ class SectionCaseForm(forms.ModelForm):
         ]
         widgets = {
             'defect_sheet': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet2': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type2': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type2': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet3': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type3': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type3': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet4': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type4': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type4': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet5': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type5': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type5': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet6': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type6': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type6': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet7': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type7': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type7': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet8': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type8': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type8': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet9': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type9': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type9': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
             'defect_sheet10': forms.Select(attrs={'class': 'form-control'}),
-            'defect_type10': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'defect_type10': forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         }
 
 class ConfirmDeleteForm(forms.Form):
@@ -93,7 +93,7 @@ class ConfirmDeleteForm(forms.Form):
 class MultiSectionForm(forms.Form):
     sections = forms.ModelMultipleChoiceField(
         queryset=Section.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         required=True,
         label="بخش‌ها"
     )
@@ -103,7 +103,7 @@ class MultiSectionForm(forms.Form):
 class MultiRoomForm(forms.Form):
     rooms = forms.ModelMultipleChoiceField(
         queryset=Room.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         required=True,
         label="اتاق عمل ها"
     )
@@ -113,7 +113,7 @@ class MultiRoomForm(forms.Form):
 class MultiDoctorForm(forms.Form):
     doctors = forms.ModelMultipleChoiceField(
         queryset=Doctor.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-multiple'}),
         required=True,
         label="پزشکان"
     )

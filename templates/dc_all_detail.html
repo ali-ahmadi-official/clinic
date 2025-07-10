@@ -176,24 +176,6 @@
     </div>
 </div>
 
-<table style="display: none;">
-    {% for name, count in age_counts.items %}
-    <tr>
-        <td>{{ name }}</td>
-        <td>{{ count }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<table style="display: none;">
-    {% for name, count in gender_counts.items %}
-    <tr>
-        <td>{{ name }}</td>
-        <td>{{ count }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
 <div id="myDiv2" class="fixed-div hidden-div" style="display: none; flex-direction: column;">
 <button class="close-btn" onclick="hideAllDivs()">X</button>
 <table id="myTable2" class="table align-items-center mb-0">
@@ -313,14 +295,14 @@
 </script>
 
 <script>
-    function exportToExcel1() {
-        const div = document.querySelector('#myDiv1');
+    function exportToExcel2() {
+        const div = document.querySelector('#myDiv2');
         const black = document.querySelector('.black');
         div.style.display = 'flex';
         black.style.display = 'flex';
 
         let wb = XLSX.utils.book_new();
-        let ws = XLSX.utils.table_to_sheet(document.getElementById('myTable1'));
+        let ws = XLSX.utils.table_to_sheet(document.getElementById('myTable2'));
         XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
         XLSX.writeFile(wb, "table.xlsx");
     }

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load my_filters %}
 
 {% block title %}
 جزئیات پرونده بخش: {{ section_case.number }}
@@ -17,15 +18,15 @@
 <div class="row">
     <div class="my-grid">
         <div>
-            <label>بیمه</label>
+            <label>بیمار</label>
             <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.insurance }}" disabled>
+                <input type="text" class="form-control" value="{{ section_case.patient.full_name }}" disabled>
             </div>
         </div>
         <div>
-            <label>تاریخ ترخیص</label>
+            <label>شماره پرونده</label>
             <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.discharge_date }}" disabled>
+                <input type="text" class="form-control" value="{{ section_case.number }}" disabled>
             </div>
         </div>
         <div>
@@ -41,27 +42,21 @@
             </div>
         </div>
         <div>
-            <label>تاریخ پذیرش</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.admission_date }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>شماره پرونده</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.number }}" disabled>
-            </div>
-        </div>
-        <div>
             <label>پزشک معرف</label>
             <div class="mb-3">
                 <input type="text" class="form-control" value="{{ section_case.representative_doctor }}" disabled>
             </div>
         </div>
         <div>
-            <label>بیمار</label>
+            <label>تاریخ پذیرش</label>
             <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.patient.full_name }}" disabled>
+                <input type="text" class="form-control" value="{{ section_case.admission_date }}" disabled>
+            </div>
+        </div>
+        <div>
+            <label>تاریخ ترخیص</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.discharge_date }}" disabled>
             </div>
         </div>
         <div>
@@ -71,116 +66,9 @@
             </div>
         </div>
         <div>
-            <label>برگ نقص</label>
+            <label>بیمه</label>
             <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>برگ نقص 2</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet2_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 2</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type2_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>برگ نقص 3</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet3_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 3</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type3_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 4</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet4_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 4</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type4_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 5</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet5_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 5</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type5_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 6</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet6_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 6</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type6_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 7</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet7_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 7</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type7_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 8</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet8_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 8</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type8_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 9</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet9_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 9</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type9_display }}" disabled>
-            </div>
-        </div><div>
-            <label>برگ نقص 10</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet10_display }}" disabled>
-            </div>
-        </div>
-        <div>
-            <label>نوع نقص 10</label>
-            <div class="mb-3">
-                <input type="text" class="form-control" value="{{ section_case.get_defect_type10_display }}" disabled>
+                <input type="text" class="form-control" value="{{ section_case.insurance }}" disabled>
             </div>
         </div>
         <div>
@@ -195,6 +83,166 @@
                 <input type="text" class="form-control" value="{{ stay_day }}" disabled>
             </div>
         </div>
+    </div>
+    <div class="my-grid">
+        {% if section_case.get_defect_sheet_display %}
+        <div>
+            <label>برگ نقص</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet_display }}" disabled>
+            </div>
+            <label>نوع نقص</label>
+            <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                {% for defect in section_case.get_defect_type_display|split:"," %}
+                    <li>{{ defect }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet2_display %}
+        <div>
+            <label>برگ نقص 2</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet2_display }}" disabled>
+            </div>
+            <label>نوع نقص 2</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type2_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet3_display %}
+        <div>
+            <label>برگ نقص 3</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet3_display }}" disabled>
+            </div>
+            <label>نوع نقص 3</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type3_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet4_display %}
+        <div>
+            <label>برگ نقص 4</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet4_display }}" disabled>
+            </div>
+            <label>نوع نقص 4</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type4_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet5_display %}
+        <div>
+            <label>برگ نقص 5</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet5_display }}" disabled>
+            </div>
+            <label>نوع نقص 5</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type5_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet6_display %}
+        <div>
+            <label>برگ نقص 6</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet6_display }}" disabled>
+            </div>
+            <label>نوع نقص 6</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type6_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet7_display %}
+        <div>
+            <label>برگ نقص 7</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet7_display }}" disabled>
+            </div>
+            <label>نوع نقص 7</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type7_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet8_display %}
+        <div>
+            <label>برگ نقص 8</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet8_display }}" disabled>
+            </div>
+            <label>نوع نقص 8</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type8_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet9_display %}
+        <div>
+            <label>برگ نقص 9</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet9_display }}" disabled>
+            </div>
+            <label>نوع نقص 9</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type9_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if section_case.get_defect_sheet10_display %}
+        <div>
+            <label>برگ نقص 10</label>
+            <div class="mb-3">
+                <input type="text" class="form-control" value="{{ section_case.get_defect_sheet10_display }}" disabled>
+            </div>
+            <label>نوع نقص 10</label>
+            <div class="mb-3">
+                <ul style="height: 100px; overflow-y: scroll; background-color: #e3e3e7; border-radius: 8px;">
+                    {% for defect in section_case.get_defect_type10_display|split:"," %}
+                        <li>{{ defect }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

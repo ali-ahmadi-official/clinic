@@ -16,7 +16,7 @@
 {% block contain %}
 <div class="row">
     <div class="col-12">
-        <h5>فیلتر اتاق های عمل <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
+        <h5>جستجو اتاق های عمل <span style="font-size: small; color: #f97316;">پر کردن تمامی موارد الزامی نیست</span></h5>
         <form method="get" class="my-form">
             <input title="شناسه اتاق عمل" type="number" name="id" class="form-control w-40" placeholder="شناسه اتاق عمل" style="width: 100% !important;"
                 value="{{ request.GET.id }}">
@@ -37,7 +37,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0" style="display: flex; justify-content: space-between;">
-                <h6>لیست اتاق های عمل</h6>
+                <h6>لیست اتاق های عمل <span><a href="{% url 'analyze_room' %}" style="font-size: small; color: #f97316;">مقایسه و آنالیز</a></span></h6>
                 <button
                     style="background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"

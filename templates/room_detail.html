@@ -31,7 +31,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار کل پزشکان</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد کل پزشکان</p>
                             <h5 class="font-weight-bolder mb-0">
                                 {{ doctors_count }}
                             </h5>
@@ -57,7 +57,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار کل بیماران</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد کل بیماران</p>
                             <h5 class="font-weight-bolder mb-0">
                                 {{ patients_count }}
                             </h5>
@@ -83,7 +83,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار پرونده های اتاق عمل</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد پرونده های اتاق عمل</p>
                             <h5 class="font-weight-bolder mb-0" id="total">
                                 {{ filtered_room_cases_count }}
                             </h5>
@@ -109,7 +109,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار عمل های بزرگ</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد عمل های بزرگ</p>
                             <h5 class="font-weight-bolder mb-0" id="total">
                                 {{ filtered_big_room_cases_count }}
                             </h5>
@@ -137,7 +137,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار عمل های متوسط</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد عمل های متوسط</p>
                             <h5 class="font-weight-bolder mb-0" id="total">
                                 {{ filtered_medium_room_cases_count }}
                             </h5>
@@ -165,7 +165,7 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">شمار عمل های کوچک</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">تعداد عمل های کوچک</p>
                             <h5 class="font-weight-bolder mb-0" id="total">
                                 {{ filtered_small_room_cases_count }}
                             </h5>
@@ -198,15 +198,6 @@
         <button class="my-btn-time" style="background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;" onclick="captureImage()">دانلود</button>
     </div>
 </div>
-
-<table style="display: none;">
-    {% for name, count in doctor_cases.items %}
-    <tr>
-        <td>{{ name }}</td>
-        <td>{{ count }}</td>
-    </tr>
-    {% endfor %}
-</table>
 
 <div id="myDiv1" class="fixed-div hidden-div" style="display: none; flex-direction: column;">
 <button class="close-btn" onclick="hideAllDivs()">X</button>
