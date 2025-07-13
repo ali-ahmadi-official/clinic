@@ -117,9 +117,14 @@ def main(request):
         sections_count = sections.count()
         rooms_count = rooms.count()
 
-        section_cases = SectionCase.objects.filter(group=group)
+        if request.GET.get("year"):
+            section_cases = SectionCase.objects.filter(group=group, admission_date__icontains=request.GET.get("year"))
+            room_cases = RoomCase.objects.filter(group=group, operation_date__icontains=request.GET.get("year"))
+        else:
+            section_cases = SectionCase.objects.filter(group=group)
+            room_cases = RoomCase.objects.filter(group=group)
+
         section_cases_count = section_cases.count()
-        room_cases = RoomCase.objects.filter(group=group)
         room_cases_count = room_cases.count()
         cases_count = section_cases_count + room_cases_count
 
@@ -2494,13 +2499,16 @@ def analyze_defect(request):
 
     if Excel.objects.filter(group=group).exists():
         section_cases = SectionCase.objects.filter(group=group)
-        defect_cases = section_cases.filter(
-            Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False) |
-            Q(defect_sheet3__isnull=False) | Q(defect_sheet4__isnull=False) |
-            Q(defect_sheet5__isnull=False) | Q(defect_sheet6__isnull=False) |
-            Q(defect_sheet7__isnull=False) | Q(defect_sheet8__isnull=False) |
-            Q(defect_sheet9__isnull=False) | Q(defect_sheet10__isnull=False)
-        )
+
+        # فیلتر بر اساس بخش اگر موجود باشد
+        section_param = request.GET.get("section")
+        if section_param:
+            section_cases = section_cases.filter(section=section_param)
+
+        # فیلتر بر اساس پزشک اگر موجود باشد
+        doctor_param = request.GET.get("doctor")
+        if doctor_param:
+            section_cases = section_cases.filter(doctor=doctor_param)
 
         # آماده‌سازی داده نقص
         defect_counts = {}
@@ -2508,7 +2516,7 @@ def analyze_defect(request):
         defect_type_counts = {}
         defect_type_percents = {}
 
-        filtered_section_cases = []
+        filtered_section_cases = section_cases
 
         if request.GET.get("start") and request.GET.get("end"):
             try:
@@ -2517,6 +2525,7 @@ def analyze_defect(request):
                 if start > end:
                     start, end = end, start
 
+                filtered_section_cases = []
                 for case in section_cases:
                     if isinstance(case.admission_date, str):
                         try:
@@ -2525,119 +2534,60 @@ def analyze_defect(request):
                                 filtered_section_cases.append(case)
                         except:
                             continue
-
-                # شمارش نقص‌ها در بازه زمانی
-                def count_defects(
-                        cases, 
-                        field1, field2, field3, field4, field5, field6, field7, field8, field9, field10,
-                        choices
-                ):
-                    counts, percents = {}, {}
-                    for code, name in choices:
-                        count = sum(1 for c in cases if getattr(c, field1) == code or getattr(c, field2) == code or getattr(c, field3) == code or getattr(c, field4) == code or getattr(c, field5) == code or getattr(c, field6) == code or getattr(c, field7) == code or getattr(c, field8) == code or getattr(c, field9) == code or getattr(c, field10) == code)
-                        total = sum(1 for c in cases if getattr(c, field1) or getattr(c, field2))
-                        counts[name] = count
-                        percents[name] = round((count * 100 / total), 0) if total else 0
-                    return counts, percents
-                
-                def count_multiselect_defects(cases, fields, choices):
-                    counts, percents = {}, {}
-                    total = sum(
-                        1 for c in cases if any(getattr(c, f, None) for f in fields)
-                    )
-
-                    for code, name in choices:
-                        count = sum(
-                            1 for c in cases for f in fields
-                            if code in (getattr(c, f, []) or [])
-                        )
-                        counts[name] = count
-                        percents[name] = round((count * 100 / total), 0) if total else 0
-
-                    return counts, percents
-
-                defect_counts, defect_percents = count_defects(
-                    filtered_section_cases, 
-                    'defect_sheet', 'defect_sheet2', 'defect_sheet3', 'defect_sheet4', 'defect_sheet5', 'defect_sheet6', 'defect_sheet7', 'defect_sheet8', 'defect_sheet9', 'defect_sheet10', 
-                    defect_sheet_choices
-                )
-
-                fields = [
-                    'defect_type', 'defect_type2', 'defect_type3',
-                    'defect_type4', 'defect_type5', 'defect_type6',
-                    'defect_type7', 'defect_type8', 'defect_type9', 'defect_type10'
-                ]
-
-                defect_type_counts, defect_type_percents = count_multiselect_defects(
-                    filtered_section_cases,
-                    fields,
-                    defect_type_choices
-                )
-
             except:
                 pass
-        else:
-            def count_global_defects(
-                    field1, field2, field3, field4, field5, field6, field7, field8, field9, field10,
-                    choices, filter_field
-            ):
-                counts, percents = {}, {}
-                total = defect_cases.count()
-                for code, name in choices:
-                    count = section_cases.filter(**{field1: code}).count() + \
-                            section_cases.filter(**{field2: code}).count() + \
-                            section_cases.filter(**{field3: code}).count() + \
-                            section_cases.filter(**{field4: code}).count() + \
-                            section_cases.filter(**{field5: code}).count() + \
-                            section_cases.filter(**{field6: code}).count() + \
-                            section_cases.filter(**{field7: code}).count() + \
-                            section_cases.filter(**{field8: code}).count() + \
-                            section_cases.filter(**{field9: code}).count() + \
-                            section_cases.filter(**{field10: code}).count()
-                    counts[name] = count
-                    percents[name] = round((count * 100 / total), 0) if total else 0
-                return counts, percents
-            
-            def count_multiselect_defects(cases, fields, choices):
-                counts, percents = {}, {}
-                total = sum(
-                    1 for c in cases if any(getattr(c, f, None) for f in fields)
+        
+        defect_cases = filtered_section_cases.filter(
+            Q(defect_sheet__isnull=False) | Q(defect_sheet2__isnull=False) |
+            Q(defect_sheet3__isnull=False) | Q(defect_sheet4__isnull=False) |
+            Q(defect_sheet5__isnull=False) | Q(defect_sheet6__isnull=False) |
+            Q(defect_sheet7__isnull=False) | Q(defect_sheet8__isnull=False) |
+            Q(defect_sheet9__isnull=False) | Q(defect_sheet10__isnull=False)
+        )
+        
+        defect_sheet_fields = ['defect_sheet'] + [f'defect_sheet{i}' for i in range(2, 11)]
+        defect_type_fields = ['defect_type'] + [f'defect_type{i}' for i in range(2, 11)]
+
+        defect_counts = {
+            name: sum([
+                1 for sc in filtered_section_cases
+                if any(getattr(sc, field) == code for field in defect_sheet_fields)
+            ]) for code, name in defect_sheet_choices
+        }
+
+        defect_type_counts = {
+            name: sum([
+                1 for sc in filtered_section_cases
+                if any(
+                    getattr(sc, field) and code in getattr(sc, field)
+                    for field in defect_type_fields
                 )
+            ]) for code, name in defect_type_choices
+        }
 
-                for code, name in choices:
-                    count = sum(
-                        1 for c in cases for f in fields
-                        if code in (getattr(c, f, []) or [])
-                    )
-                    counts[name] = count
-                    percents[name] = round((count * 100 / total), 0) if total else 0
+        total_cases = len(defect_cases) or 1
 
-                return counts, percents
+        defect_percents = {
+            name: round((count / total_cases) * 100, 0)
+            for name, count in defect_counts.items()
+        }
 
-            defect_counts, defect_percents = count_global_defects(
-                'defect_sheet', 'defect_sheet2', 'defect_sheet3', 'defect_sheet4', 'defect_sheet5', 'defect_sheet6', 'defect_sheet7', 'defect_sheet8', 'defect_sheet9', 'defect_sheet10', 
-                defect_sheet_choices, 'defect_sheet'
-            )
-
-            fields = [
-                'defect_type', 'defect_type2', 'defect_type3',
-                'defect_type4', 'defect_type5', 'defect_type6',
-                'defect_type7', 'defect_type8', 'defect_type9', 'defect_type10'
-            ]
-
-            defect_type_counts, defect_type_percents = count_multiselect_defects(
-                section_cases,
-                fields,
-                defect_type_choices
-            )
+        defect_type_percents = {
+            name: round((count / total_cases) * 100, 0)
+            for name, count in defect_type_counts.items()
+        }
 
         context = {
             'defect_counts': defect_counts,
             'defect_type_counts': defect_type_counts,
             'defect_percents': defect_percents,
             'defect_type_percents': defect_type_percents,
+            'section_list': Section.objects.filter(group=group),
+            'doctor_list': Doctor.objects.filter(group=group),
+            'selected_section': int(section_param) if section_param and section_param.isdigit() else None,
+            'selected_doctor': int(doctor_param) if doctor_param and doctor_param.isdigit() else None,
         }
 
         return render(request, 'analyze_defect.html', context=context)
     else:
-        return render(request, 'main.html', context=context)
+        return render(request, 'main.html', context={})

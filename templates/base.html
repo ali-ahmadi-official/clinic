@@ -172,7 +172,7 @@ background: linear-gradient(157deg, rgb(213, 213, 213) 0%, #333446 100%); margin
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1" id="color">پزشکان</span>
+                        <span class="nav-link-text me-1" id="color">کارنامه عملکرد پزشک</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -202,7 +202,7 @@ background: linear-gradient(157deg, rgb(213, 213, 213) 0%, #333446 100%); margin
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text me-1" id="color">بیماران</span>
+                        <span class="nav-link-text me-1" id="color">مانیتورینگ بیماران</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -333,19 +333,6 @@ background: linear-gradient(157deg, rgb(213, 213, 213) 0%, #333446 100%); margin
     </div>
     <main class="main-content position-relative h-100 border-radius-lg overflow-x-hidden"
     style="max-height: calc(100vh - 40px);">
-        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
-            navbar-scroll="true">
-            <div class="container-fluid py-1 px-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 ">
-                        <li class="breadcrumb-item text-sm ps-2"><a class="opacity-5 text-dark"
-                                href="javascript:;">صفحات</a></li>
-                        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{% block page1 %} {% endblock %}</li>
-                    </ol>
-                    <h6 class="font-weight-bolder mb-0">{% block page2 %} {% endblock %}</h6>
-                </nav>
-            </div>
-        </nav>
         <div class="container-fluid py-4" style="min-height: 100vh;">
             {% block contain %}
             {% endblock %}

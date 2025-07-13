@@ -15,6 +15,13 @@
 
 {% block contain %}
 <div class="row">
+    <div class="col-12">
+        <form method="get" class="my-time">
+            <input type="text" title="سال شمسی" name="year" class="form-control" placeholder="سال شمسی (عدد لاتین وارد کنید)" style="width: 100% !important;"
+                value="{{ request.GET.year }}">
+            <button style="background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;">تحلیل داده های سال</button>
+        </form>
+    </div>
     <div class="col-lg-3 col-sm-6 mb-lg-0" style="margin-bottom: 24px !important;">
         <div class="card">
             <div class="card-body p-3">

@@ -22,6 +22,24 @@
                 value="{{ request.GET.start }}" autocomplete="off">
             <input data-jdp title="تا تاریخ" name="end" class="form-control w-40" placeholder="تا تاریخ" style="width: 100% !important;"
                 value="{{ request.GET.end }}" autocomplete="off">
+            <select name="section" class="form-control" title="بخش">
+                <option value="">بخش</option>
+                {% for section in section_list %}
+                    <option value="{{ section.id }}"
+                        {% if section.id == selected_section %}selected{% endif %}>
+                        {{ section.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <select name="doctor" class="form-control" title="پزشک">
+                <option value="">پزشک</option>
+                {% for doctor in doctor_list %}
+                    <option value="{{ doctor.id }}"
+                        {% if doctor.id == selected_doctor %}selected{% endif %}>
+                        {{ doctor.full_name }}
+                    </option>
+                {% endfor %}
+            </select>
             <button class="my-btn-time" style="background-color: #fff; border: 1px solid #f97316; border-radius: 0.5rem; color: #f97316; padding: 8px 32px; font-size: 0.75rem; font-weight: 700;">جستجو</button>
         </form>
     </div>
