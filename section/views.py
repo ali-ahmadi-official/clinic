@@ -110,19 +110,36 @@ def main(request):
 
     if Excel.objects.filter(group=group).exists():
         # آمار اولیه
-        doctors_count = Doctor.objects.filter(group=group).count()
-        patients_count = Patient.objects.filter(group=group).count()
         sections = Section.objects.filter(group=group)
         rooms = Room.objects.filter(group=group)
         sections_count = sections.count()
         rooms_count = rooms.count()
 
-        if request.GET.get("year"):
-            section_cases = SectionCase.objects.filter(group=group, admission_date__icontains=request.GET.get("year"))
-            room_cases = RoomCase.objects.filter(group=group, operation_date__icontains=request.GET.get("year"))
+        year = request.GET.get("year")
+
+        if year:
+            section_cases = SectionCase.objects.filter(group=group, admission_date__icontains=year)
+            room_cases = RoomCase.objects.filter(group=group, operation_date__icontains=year)
+            dc_cases = DC.objects.filter(group=group, death_date__icontains=year)
         else:
             section_cases = SectionCase.objects.filter(group=group)
             room_cases = RoomCase.objects.filter(group=group)
+            dc_cases = DC.objects.filter(group=group)
+
+        # استخراج doctor_id ها و patient_id ها
+        doctor_ids_section = set(section_cases.values_list('doctor_id', flat=True))
+        doctor_ids_room = set(room_cases.values_list('doctor_id', flat=True))
+        doctor_ids_dc = set(dc_cases.values_list('doctor_id', flat=True))
+
+        doctor_ids = doctor_ids_section.union(doctor_ids_room, doctor_ids_dc)
+        doctors_count = len(doctor_ids)
+
+        patient_ids_section = set(section_cases.values_list('patient_id', flat=True))
+        patient_ids_room = set(room_cases.values_list('patient_id', flat=True))
+        patient_ids_dc = set(dc_cases.values_list('patient_id', flat=True))
+
+        patient_ids = patient_ids_section.union(patient_ids_room, patient_ids_dc)
+        patients_count = len(patient_ids)
 
         section_cases_count = section_cases.count()
         room_cases_count = room_cases.count()
