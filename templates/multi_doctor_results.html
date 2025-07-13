@@ -479,10 +479,10 @@
     </div>
 </div>
 
-<div class="data_defect" style="display: none;">
+<div class="data_defect" style="display: none;" data-owner="{{ doctor_name }}">
     {{ data.defect_counts| safe }}
 </div>
-<div class="data_type" style="display: none;">
+<div class="data_type" style="display: none;" data-owner="{{ doctor_name }}">
     {{ data.defect_type_counts| safe }}
 </div>
 {% endfor %}
@@ -510,6 +510,8 @@
     data_defects.forEach((div, index) => {
         // تبدیل تک کوتیشن به دابل کوتیشن برای JSON معتبر
         const fixedJSON = div.innerHTML.replace(/'/g, '"');
+        const owner = div.getAttribute('data-owner');
+
 
         let parsedData;
         try {
@@ -525,7 +527,7 @@
         }
 
         datasets.push({
-            label: "پزشک شماره " + (index + 1) + " انتخاب شده", 
+            label: owner, 
             data: Object.values(parsedData),
             backgroundColor: `hsl(${index * 50}, 70%, 60%)`  // رنگ متفاوت برای هر بار
         });
@@ -558,6 +560,7 @@
     data_types.forEach((div, index) => {
         // تبدیل تک کوتیشن به دابل کوتیشن برای JSON معتبر
         const fixedJSON = div.innerHTML.replace(/'/g, '"');
+        const owner = div.getAttribute('data-owner');
 
         let parsedData;
         try {
@@ -572,7 +575,7 @@
         }
 
         datasetsTwo.push({
-            label: "پزشک شماره " + (index + 1) + " انتخاب شده",
+            label: owner,
             data: Object.values(parsedData),
             backgroundColor: `hsl(${index * 50}, 70%, 60%)`  // رنگ متفاوت برای هر بار
         });
